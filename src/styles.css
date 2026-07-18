@@ -158,6 +158,7 @@
   transform: rotate(-4deg); transition: transform 0.4s var(--ease);
 }
 .logo:hover .logo-mark { transform: rotate(4deg) scale(1.05); }
+.logo-img { height: 34px; width: auto; display: block; vertical-align: middle; flex: none; }
 .logo-word { font-family: var(--sans); font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
 
 .nav-links { display: flex; align-items: center; gap: 26px; }
@@ -216,7 +217,7 @@
 
 h1.display {
   font-family: var(--display); font-weight: 800;
-  font-size: clamp(34px, 8vw, 82px); line-height: 1.0; letter-spacing: -0.02em;
+  font-size: clamp(30px, 6vw, 62px); line-height: 1.0; letter-spacing: -0.02em;
   color: var(--forest); margin-bottom: 28px;
 }
 .display .line { display: block; }
@@ -323,6 +324,67 @@ section { position: relative; }
 .callout h2 { font-family: var(--display); font-weight: 800; font-size: clamp(28px, 4.4vw, 44px); line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 26px; color: var(--cream); max-width: 640px; margin-left: auto; margin-right: auto; }
 .callout .btn-primary { background: var(--cream); color: var(--orange); }
 
+/* ---------- Student cases carousel ---------- */
+.cases { max-width: 900px; margin: 0 auto; }
+.case-card {
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.14);
+  border-radius: var(--r-card);
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: center;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.case-card:hover { box-shadow: rgba(43,26,16,0.10) 0 18px 34px -16px; }
+.case-photo {
+  width: 100%; aspect-ratio: 3 / 4;
+  background: #e6e2da; border: 1px solid rgba(43,26,16,0.10);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  color: rgba(43,26,16,0.55);
+}
+.case-photo-initials {
+  font-family: var(--display); font-weight: 800;
+  font-size: 40px; letter-spacing: -0.02em;
+}
+.case-photo-img {
+  width: 100%; aspect-ratio: 3 / 4;
+  object-fit: cover; border-radius: 10px;
+  border: 1px solid rgba(43,26,16,0.10);
+  filter: grayscale(100%);
+}
+.case-body { display: flex; flex-direction: column; gap: 22px; }
+.case-quote {
+  font-family: var(--sans); font-weight: 400;
+  font-size: clamp(17px, 1.9vw, 20px);
+  line-height: 1.55; color: var(--forest);
+}
+.case-meta { display: flex; flex-direction: column; gap: 2px; }
+.case-name { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--forest); }
+.case-role { font-size: 13px; color: var(--muted); }
+
+.cases-controls {
+  display: flex; align-items: center; justify-content: center;
+  gap: 18px; margin-top: 28px;
+}
+.case-arrow {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--cream); border: 1px solid var(--orange);
+  color: var(--orange); cursor: pointer;
+  display: grid; place-items: center;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.35s var(--ease);
+}
+.case-arrow svg { width: 18px; height: 18px; }
+.case-arrow:hover { background: var(--orange); color: var(--cream); transform: translateY(-2px); }
+.case-arrow:active { transform: translateY(0); }
+.cases-counter {
+  font-family: var(--mono); font-size: 13px;
+  letter-spacing: 0.06em; color: var(--muted);
+  min-width: 72px; text-align: center;
+}
+
 /* ---------- Testimonial ---------- */
 .quote-card {
   background: var(--cream); border: 1px solid var(--orange); border-radius: 20px;
@@ -387,6 +449,8 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .wrap { padding: 0 22px; }
   .callout { padding: 44px 26px; }
   .quote-card { padding: 40px 26px; }
+  .case-card { grid-template-columns: 1fr; gap: 22px; padding: 24px; }
+  .case-photo, .case-photo-img { max-width: 200px; margin: 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

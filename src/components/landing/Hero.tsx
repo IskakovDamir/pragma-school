@@ -50,23 +50,11 @@ export function Hero() {
       </div>
 
       <div className="hero-inner">
-        <span className="badge anim d1">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
-          </svg>
-          Онлайн-школа автоматизации на ИИ
-        </span>
         <h1 className="display">
-          <span className="line anim d2">Собери свою первую</span>
+          <span className="line anim d2">Разберись с ИИ с нуля</span>
+          <span className="line anim d3">и собери своего первого</span>
           <span className="line anim d3">
-            <span className="mark">автоматизацию</span> на ИИ
+            <span className="mark">ИИ-агента</span> за пару недель
           </span>
         </h1>
         <p className="subhead anim d4">

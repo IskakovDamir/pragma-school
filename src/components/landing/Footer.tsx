@@ -5,7 +5,7 @@ export function Footer() {
         <div className="foot-grid">
           <div className="foot-brand">
             <a className="logo" href="#">
-              <span className="logo-mark">P</span>
+              <img src="/pragma-logo.svg" alt="Pragma School" className="logo-img" />
               <span className="logo-word">Pragma School</span>
             </a>
             <p>

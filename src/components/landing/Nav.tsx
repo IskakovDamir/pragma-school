@@ -16,7 +16,7 @@ export function Nav() {
       <div className="nav-shell">
         <nav className="nav" id="nav">
           <a className="logo" href="#">
-            <span className="logo-mark">P</span>
+            <img src="/pragma-logo.svg" alt="Pragma School" className="logo-img" />
             <span className="logo-word">Pragma School</span>
           </a>
           <div className="nav-links">
