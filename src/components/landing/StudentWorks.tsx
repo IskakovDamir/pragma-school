@@ -6,6 +6,7 @@ type SiteWork = {
   kind: "site";
   title: string;
   url: string;
+  slug: string;
 };
 
 type AgentWork = {
@@ -17,6 +18,7 @@ type AgentWork = {
 type Work = SiteWork | AgentWork;
 
 const flowReviews: FlowConfig = {
+  variant: "fan-in-radar",
   inputs: ["2gis.svg", "flamp.svg", "instagram.svg"],
   hub: true,
   outputs: ["telegram.svg", "gmail.svg"],
@@ -24,10 +26,11 @@ const flowReviews: FlowConfig = {
     "Агент следит за новыми отзывами на разных площадках, оценивает тональность и присылает алерт с готовым черновиком ответа.",
   captionsIn: ["2ГИС", "Flamp", "Instagram"],
   captionsOut: ["Telegram", "Gmail"],
-  captionHub: "Анализ",
+  captionHub: "Мониторинг",
 };
 
 const flowSupport: FlowConfig = {
+  variant: "symmetric-h",
   inputs: ["whatsapp.svg", "telegram.svg"],
   hub: true,
   outputs: ["slack.svg", "amocrm.svg"],
@@ -35,10 +38,11 @@ const flowSupport: FlowConfig = {
     "Агент отвечает на типовые вопросы клиентов сам, а сложные обращения передаёт команде и заводит карточку в CRM.",
   captionsIn: ["WhatsApp", "Telegram"],
   captionsOut: ["Slack", "amoCRM"],
-  captionHub: "Триаж",
+  captionHub: "Ответ",
 };
 
 const flowPayments: FlowConfig = {
+  variant: "fan-out",
   inputs: ["kaspi.svg", "google-sheets.svg"],
   hub: true,
   outputs: ["amocrm.svg", "gmail.svg", "telegram.svg"],
@@ -50,6 +54,7 @@ const flowPayments: FlowConfig = {
 };
 
 const flowAssistant: FlowConfig = {
+  variant: "funnel-merge",
   inputs: ["google-calendar.svg", "gmail.svg", "notion.svg"],
   hub: true,
   outputs: ["telegram.svg"],
@@ -62,15 +67,15 @@ const flowAssistant: FlowConfig = {
 
 /* site titles provisional; real thumbnails can replace the wireframe later */
 const WORKS: Work[] = [
-  { kind: "site", title: "Mycelion", url: "https://www.mycelion.store/" },
+  { kind: "site", title: "Mycelion", url: "https://www.mycelion.store/", slug: "mycelion" },
   { kind: "agent", title: "Мониторинг отзывов", flow: flowReviews },
-  { kind: "site", title: "Aurora XR1", url: "https://www.auroraxr1.store/#vision" },
+  { kind: "site", title: "Aurora XR1", url: "https://www.auroraxr1.store/#vision", slug: "aurora" },
   { kind: "agent", title: "Первая линия поддержки", flow: flowSupport },
-  { kind: "site", title: "Qyran", url: "https://www.qyran.online/" },
+  { kind: "site", title: "Qyran", url: "https://www.qyran.online/", slug: "qyran" },
   { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments },
-  { kind: "site", title: "Planas Thai", url: "https://www.planasthai.space/" },
+  { kind: "site", title: "Planas Thai", url: "https://www.planasthai.space/", slug: "planasthai" },
   { kind: "agent", title: "Ассистент дня", flow: flowAssistant },
-  { kind: "site", title: "Sayahat", url: "https://www.sayahat.site/" },
+  { kind: "site", title: "Sayahat", url: "https://www.sayahat.site/", slug: "sayahat" },
 ];
 
 function extractDomain(url: string): string {
@@ -82,7 +87,9 @@ function extractDomain(url: string): string {
   }
 }
 
-function SiteMockup({ domain }: { domain?: string }) {
+function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const showImg = !!slug && !imgFailed;
   return (
     <div className="site-mockup" aria-hidden="true">
       <div className="site-mockup-chrome">
@@ -92,14 +99,26 @@ function SiteMockup({ domain }: { domain?: string }) {
         <div className="site-mockup-url">{domain ?? ""}</div>
       </div>
       <div className="site-mockup-body">
-        <div className="site-mockup-nav">
-          <span />
-          <span />
-          <span />
-        </div>
-        <div className="site-mockup-hero" />
-        <div className="site-mockup-line" />
-        <div className="site-mockup-line short" />
+        {showImg ? (
+          <img
+            className="site-mockup-shot"
+            src={`/works/${slug}.png`}
+            alt=""
+            onError={() => setImgFailed(true)}
+            loading="lazy"
+          />
+        ) : (
+          <>
+            <div className="site-mockup-nav">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="site-mockup-hero" />
+            <div className="site-mockup-line" />
+            <div className="site-mockup-line short" />
+          </>
+        )}
       </div>
     </div>
   );
@@ -111,7 +130,7 @@ function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
     <button type="button" className="work-card" onClick={onOpen}>
       <div className="work-preview">
         {work.kind === "site" ? (
-          <SiteMockup domain={extractDomain(work.url)} />
+          <SiteMockup domain={extractDomain(work.url)} slug={work.slug} />
         ) : (
           <FlowGraph config={work.flow} size="mini" />
         )}
@@ -195,7 +214,7 @@ export function StudentWorks() {
 
     let raf = 0;
     let last = performance.now();
-    const speed = 40;
+    const speed = 68;
 
     const step = (t: number) => {
       const dt = t - last;
