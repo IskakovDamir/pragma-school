@@ -13,7 +13,7 @@ export function Footer() {
               устроено обучение.
             </p>
             <div className="news">
-              <input type="email" placeholder="ты@почта.ру" aria-label="Почта" />
+              <input type="email" placeholder="example@gmail.com" aria-label="Почта" />
               <button type="button" className="btn btn-primary btn-sm">
                 Подписаться
               </button>

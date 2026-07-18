@@ -1,3 +1,35 @@
+const PERSONAL_LOGOS = [
+  "gmail.svg",
+  "telegram.svg",
+  "notion.svg",
+  "google-sheets.svg",
+  "whatsapp.svg",
+];
+
+const CORPORATE_LOGOS = [
+  "slack.svg",
+  "microsoft-teams.svg",
+  "amocrm.svg",
+  "bitrix24.svg",
+  "google-cloud.svg",
+];
+
+function LogoCluster({ files }: { files: string[] }) {
+  return (
+    <div className="track-logos" aria-hidden="true">
+      {files.map((file, i) => (
+        <img
+          key={file}
+          src={`/integrations/${file}`}
+          alt=""
+          className="track-logo"
+          style={{ animationDelay: `${i * 0.25}s` }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function Tracks() {
   return (
     <section id="tracks" className="block">
@@ -27,7 +59,10 @@ export function Tracks() {
               <li>Куратор в личном чате</li>
               <li>Свой рабочий проект к финалу</li>
             </ul>
-            <span className="track-cta">Открыть трек →</span>
+            <div className="track-foot">
+              <span className="track-cta">Открыть трек →</span>
+              <LogoCluster files={PERSONAL_LOGOS} />
+            </div>
           </a>
           <a
             className="track-card reveal"
@@ -45,7 +80,10 @@ export function Tracks() {
               <li>Практика на ваших задачах</li>
               <li>Отдельный чат для команды</li>
             </ul>
-            <span className="track-cta">Открыть трек →</span>
+            <div className="track-foot">
+              <span className="track-cta">Открыть трек →</span>
+              <LogoCluster files={CORPORATE_LOGOS} />
+            </div>
           </a>
         </div>
       </div>
