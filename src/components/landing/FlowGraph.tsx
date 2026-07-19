@@ -348,7 +348,7 @@ export function FlowGraph({ config, size }: FlowGraphProps) {
               height: chipSize,
             }}
           >
-            <img src={`/integrations/${config.inputs[i]}`} alt="" />
+            <img src={`/integrations/${config.inputs[i]}`} alt="" loading="lazy" decoding="async" />
           </div>
           {isFull && config.captionsIn?.[i] ? (
             <div className="flow-caption" style={{ left: p.cx, top: p.cy + chipR + 12 }}>
@@ -405,7 +405,7 @@ export function FlowGraph({ config, size }: FlowGraphProps) {
               className={`flow-node flow-output ${isS3Plus ? "is-active" : ""}`}
               style={nodeStyle}
             >
-              <img src={`/integrations/${config.outputs[i]}`} alt="" />
+              <img src={`/integrations/${config.outputs[i]}`} alt="" loading="lazy" decoding="async" />
             </div>
             {isFull && config.captionsOut?.[i] ? (
               <div className="flow-caption" style={{ left: p.cx, top: p.cy + chipR + 12 }}>

@@ -109,8 +109,11 @@ function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
             className="site-mockup-shot"
             src={`/works/${slug}.webp`}
             alt=""
+            width={480}
+            height={300}
             onError={() => setImgFailed(true)}
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <>

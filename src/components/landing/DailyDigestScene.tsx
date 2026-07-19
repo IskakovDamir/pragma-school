@@ -217,7 +217,7 @@ export function DailyDigestScene({ size }: Props) {
             }`}
             style={sourcePose(s.cls, i)}
           >
-            <img src={`/integrations/${s.icon}`} alt="" className="digest-source-icon" />
+            <img src={`/integrations/${s.icon}`} alt="" className="digest-source-icon" loading="lazy" decoding="async" />
             <div className="digest-source-body">
               <div className="digest-source-l1">{s.line1}</div>
               <div className="digest-source-l2">{s.line2}</div>
@@ -259,7 +259,7 @@ export function DailyDigestScene({ size }: Props) {
       </div>
 
       <div className={`digest-toast ${showToast ? "is-visible" : ""}`}>
-        <img src="/integrations/telegram.svg" alt="" />
+        <img src="/integrations/telegram.svg" alt="" loading="lazy" decoding="async" />
         <span className="digest-toast-text">Telegram · сводка дня отправлена</span>
         <span className="digest-toast-check" aria-hidden="true">
           <svg viewBox="0 0 24 24">

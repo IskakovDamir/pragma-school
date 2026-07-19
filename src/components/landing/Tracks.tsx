@@ -23,6 +23,10 @@ function LogoCluster({ files }: { files: string[] }) {
           src={`/integrations/${file}`}
           alt=""
           className="track-logo"
+          width={24}
+          height={24}
+          loading="lazy"
+          decoding="async"
           style={{ animationDelay: `${i * 0.25}s` }}
         />
       ))}

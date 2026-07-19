@@ -185,7 +185,7 @@ export function ReviewMonitorScene({ size }: Props) {
       <div className={`review-card ${showCard ? "is-visible" : ""}`}>
         <div className="review-card-head">
           <div className="review-platform">
-            <img src={`/integrations/${data.platform}`} alt="" />
+            <img src={`/integrations/${data.platform}`} alt="" loading="lazy" decoding="async" />
             <span>{data.platformLabel}</span>
           </div>
           <StarsRow filled={data.stars} />
@@ -229,7 +229,7 @@ export function ReviewMonitorScene({ size }: Props) {
       </div>
 
       <div className={`review-toast ${showToast ? "is-visible" : ""}`}>
-        <img className="review-toast-icon" src="/integrations/telegram.svg" alt="" />
+        <img className="review-toast-icon" src="/integrations/telegram.svg" alt="" loading="lazy" decoding="async" />
         <div className="review-toast-body">
           <div className="review-toast-title">Telegram · черновик готов</div>
         </div>

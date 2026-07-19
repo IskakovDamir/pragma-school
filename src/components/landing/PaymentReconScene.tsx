@@ -180,7 +180,7 @@ export function PaymentReconScene({ size }: Props) {
     >
       <div className="payment-header">
         <div className="payment-header-title">
-          <img src="/integrations/google-sheets.svg" alt="" className="payment-header-src" />
+          <img src="/integrations/google-sheets.svg" alt="" className="payment-header-src" loading="lazy" decoding="async" />
           <span>Оплаты</span>
         </div>
         <div className="payment-header-total">
@@ -190,7 +190,7 @@ export function PaymentReconScene({ size }: Props) {
       </div>
 
       <div className={`payment-incoming ${showIncoming ? "is-visible" : ""}`}>
-        <img src="/integrations/kaspi.svg" alt="" className="payment-incoming-icon" />
+        <img src="/integrations/kaspi.svg" alt="" className="payment-incoming-icon" loading="lazy" decoding="async" />
         <div className="payment-incoming-body">
           <div className="payment-incoming-line1">
             Поступление · <b>{data.incomingAmount}</b>
@@ -244,7 +244,7 @@ export function PaymentReconScene({ size }: Props) {
       </div>
 
       <div className={`payment-crm ${showCrmLine ? "is-visible" : ""}`}>
-        <img src="/integrations/amocrm.svg" alt="" />
+        <img src="/integrations/amocrm.svg" alt="" loading="lazy" decoding="async" />
         <span>{data.crmLine ?? ""}</span>
       </div>
 
@@ -255,7 +255,7 @@ export function PaymentReconScene({ size }: Props) {
             className={`payment-toast ${showToasts ? "is-visible" : ""}`}
             style={{ transitionDelay: showToasts ? `${i * 180}ms` : "0ms" }}
           >
-            <img src={`/integrations/${t.icon}`} alt="" />
+            <img src={`/integrations/${t.icon}`} alt="" loading="lazy" decoding="async" />
             <span className="payment-toast-text">{t.text}</span>
             <span className="payment-toast-check" aria-hidden="true">
               <svg viewBox="0 0 24 24">

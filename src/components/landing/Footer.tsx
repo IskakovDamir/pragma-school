@@ -5,7 +5,7 @@ export function Footer() {
         <div className="foot-grid">
           <div className="foot-brand">
             <a className="logo" href="#">
-              <img src="/pragma-logo.svg" alt="Pragma School" className="logo-img" />
+              <img src="/pragma-logo.svg" alt="" className="logo-img" />
               <span className="logo-word">Pragma School</span>
             </a>
             <p>
@@ -20,19 +20,19 @@ export function Footer() {
             </div>
           </div>
           <div className="foot-col">
-            <h4>Курсы</h4>
+            <p className="foot-col-title">Курсы</p>
             <a href="https://personal.edu.pragma.com.kz/">Личный</a>
             <a href="https://corporate.edu.pragma.com.kz/">Корпоративный</a>
             <a href="#free">Бесплатные уроки</a>
           </div>
           <div className="foot-col">
-            <h4>Школа</h4>
+            <p className="foot-col-title">Школа</p>
             <a href="#">О нас</a>
             <a href="#">Блог</a>
             <a href="#">Контакты</a>
           </div>
           <div className="foot-col">
-            <h4>Ресурсы</h4>
+            <p className="foot-col-title">Ресурсы</p>
             <a href="#">Помощь</a>
             <a href="#">Гайды</a>
           </div>

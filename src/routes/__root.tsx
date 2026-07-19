@@ -80,12 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
-      { rel: "icon", href: "data:," },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "canonical", href: "https://edu.pragma.com.kz/" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400&display=swap&subset=latin,cyrillic",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap&subset=latin,cyrillic",
       },
       { rel: "stylesheet", href: appCss },
     ],

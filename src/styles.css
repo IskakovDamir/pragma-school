@@ -23,7 +23,7 @@
   --color-pencil: #b6b6b6;
   --color-whisper: #f1f1f1;
   --color-highlight: rgba(201, 81, 0, 0.16);
-  --color-muted: rgba(43, 26, 16, 0.60);
+  --color-muted: #6a6055;
 
   --radius-btn: 6px;
   --radius-card: 12px;
@@ -46,7 +46,7 @@
   --mint: #ffe6d2;
   --blush: #ffd9c2;
   --terracotta: #cb5521;
-  --muted: rgba(43,26,16,0.60);
+  --muted: #6a6055;
 
   /* Type */
   --display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
@@ -107,7 +107,7 @@
 .btn:hover .arrow { transform: translateX(4px); }
 
 .btn-primary {
-  background: var(--orange); color: var(--cream);
+  background: #b84a00; color: var(--cream);
   box-shadow: rgba(0,0,0,0.05) 0 1px 2px 0;
 }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: rgba(201,81,0,0.28) 0 10px 24px -8px; }
@@ -263,7 +263,7 @@ section { position: relative; }
   font-size: 13px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--orange);
+  color: #b04600;
   margin-bottom: 16px;
 }
 .eyebrow::before {
@@ -272,7 +272,7 @@ section { position: relative; }
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--orange);
+  background: #b04600;
   flex: none;
 }
 .h2 { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 5vw, 48px); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 18px; }
@@ -474,7 +474,7 @@ section { position: relative; }
 footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
 .foot-brand p { font-size: 15px; color: var(--muted); max-width: 260px; margin-top: 16px; line-height: 1.55; }
-.foot-col h4 { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #7a7a7a; margin-bottom: 16px; }
+.foot-col-title { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b6b6b; margin: 0 0 16px; font-weight: 400; }
 .foot-col a { display: block; font-size: 15px; color: var(--forest); padding: 10px 0; opacity: 0.8; transition: opacity 0.2s; }
 .foot-col a:hover { opacity: 1; }
 .news { display: flex; gap: 8px; margin-top: 16px; max-width: 300px; }

@@ -231,6 +231,8 @@ export function SupportChatScene({ size }: Props) {
                   className="support-msg-icon"
                   src={`/integrations/${icon}`}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : null}
               <div className="support-msg-bubble">
@@ -246,6 +248,8 @@ export function SupportChatScene({ size }: Props) {
                       className="support-toast-icon"
                       src={`/integrations/${icon}`}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                     />
                     <span className="support-toast-text">{BUBBLE_TEXT[k]}</span>
                     <span className="support-toast-check" aria-hidden="true">
