@@ -538,6 +538,7 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   overflow: hidden;
   display: grid;
   place-items: center;
+  container-type: size;
 }
 /* Scale existing FlowGraph mini so it looks proportional in the enlarged card;
    the graph itself is unchanged, only its visual scale in the card. */
@@ -867,14 +868,17 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   color: var(--forest);
   isolation: isolate;
 }
-.review-scene-card { font-size: 10px; }
-.review-scene-full { font-size: 15px; }
+/* Fluid font-size: em-based inner layout scales with the container's smallest
+   dimension, so the same scene fits the card preview and the modal wrap without
+   fixed pixel breakpoints. */
+.review-scene { font-size: clamp(9px, 3.6cqmin, 18px); }
 
 .review-scene-wrap-full {
-  width: min(90%, 780px);
+  width: min(96%, 900px);
   aspect-ratio: 8 / 5;
-  max-height: 60vh;
+  max-height: 62vh;
   margin: 0 auto;
+  container-type: size;
 }
 
 .review-scene.is-exiting > * { opacity: 0 !important; transform: translateY(0.3em) !important; }
@@ -882,10 +886,10 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Review card ---- */
 .review-card {
   position: absolute;
-  top: 8%;
-  left: 5%;
-  right: 5%;
-  height: 46%;
+  top: 5%;
+  left: 4%;
+  right: 4%;
+  height: 50%;
   background: var(--cream);
   border: 1px solid rgba(43,26,16,0.14);
   border-radius: 0.9em;
@@ -1075,10 +1079,10 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Agent reply bubble ---- */
 .review-reply {
   position: absolute;
+  top: 60%;
   bottom: 5%;
-  left: 5%;
-  right: 34%;
-  min-height: 26%;
+  left: 4%;
+  right: 32%;
   display: flex;
   align-items: flex-start;
   gap: 0.6em;
@@ -1141,10 +1145,11 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Telegram toast ---- */
 .review-toast {
   position: absolute;
-  bottom: 8%;
+  bottom: 6%;
   right: 4%;
-  width: 30%;
-  min-width: 8em;
+  width: 28%;
+  min-width: 7em;
+  max-width: 28%;
   display: flex;
   align-items: center;
   gap: 0.55em;
@@ -1199,14 +1204,14 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   color: var(--forest);
   isolation: isolate;
 }
-.support-chat-scene-card { font-size: 10px; }
-.support-chat-scene-full { font-size: 15px; }
+.support-chat-scene { font-size: clamp(9px, 3.6cqmin, 18px); }
 
 .support-chat-wrap-full {
-  width: min(90%, 780px);
-  aspect-ratio: 8 / 5.5;
+  width: min(96%, 900px);
+  aspect-ratio: 8 / 5.4;
   max-height: 62vh;
   margin: 0 auto;
+  container-type: size;
 }
 
 /* ---- Header ---- */
@@ -1287,6 +1292,8 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   bottom: 4%;
   overflow: hidden;
   border-radius: 0.6em;
+  background: rgba(43,26,16,0.025);
+  border: 1px dashed rgba(43,26,16,0.06);
 }
 
 .support-msg {
@@ -1460,23 +1467,23 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   color: var(--forest);
   isolation: isolate;
 }
-.payment-recon-scene-card { font-size: 10px; }
-.payment-recon-scene-full { font-size: 15px; }
+.payment-recon-scene { font-size: clamp(9px, 3.6cqmin, 18px); }
 
 .payment-recon-wrap-full {
-  width: min(90%, 780px);
+  width: min(96%, 900px);
   aspect-ratio: 8 / 5.4;
   max-height: 62vh;
   margin: 0 auto;
+  container-type: size;
 }
 
 /* ---- Header ---- */
 .payment-header {
   position: absolute;
   top: 4%;
-  left: 5%;
-  right: 5%;
-  height: 12%;
+  left: 4%;
+  right: 4%;
+  height: 11%;
   min-height: 2.2em;
   display: flex;
   align-items: center;
@@ -1517,9 +1524,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Incoming row ---- */
 .payment-incoming {
   position: absolute;
-  top: 21%;
-  left: 5%;
-  right: 5%;
+  top: 19%;
+  left: 4%;
+  right: 4%;
   min-height: 14%;
   display: flex;
   align-items: center;
@@ -1557,8 +1564,8 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Status chip (floats top-right under the header) ---- */
 .payment-chip {
   position: absolute;
-  top: 39%;
-  right: 5%;
+  top: 37%;
+  right: 4%;
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
@@ -1607,9 +1614,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Table ---- */
 .payment-table {
   position: absolute;
-  top: 44%;
-  left: 5%;
-  right: 5%;
+  top: 42%;
+  left: 4%;
+  right: 4%;
   bottom: 22%;
   background: var(--cream);
   border: 1px solid rgba(43,26,16,0.12);
@@ -1713,8 +1720,8 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 .payment-crm {
   position: absolute;
   top: 80%;
-  left: 5%;
-  right: 5%;
+  left: 4%;
+  right: 4%;
   height: 8%;
   display: inline-flex;
   align-items: center;
@@ -1744,9 +1751,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 .payment-toasts {
   position: absolute;
   bottom: 4%;
-  right: 5%;
-  width: 62%;
-  max-width: 62%;
+  right: 4%;
+  width: 60%;
+  max-width: 60%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -1808,22 +1815,22 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   color: var(--forest);
   isolation: isolate;
 }
-.daily-digest-scene-card { font-size: 10px; }
-.daily-digest-scene-full { font-size: 15px; }
+.daily-digest-scene { font-size: clamp(9px, 3.6cqmin, 18px); }
 
 .daily-digest-wrap-full {
-  width: min(90%, 780px);
-  aspect-ratio: 8 / 5.6;
+  width: min(96%, 900px);
+  aspect-ratio: 8 / 5.4;
   max-height: 62vh;
   margin: 0 auto;
+  container-type: size;
 }
 
 /* ---- Header ---- */
 .digest-header {
   position: absolute;
-  top: 5%;
-  left: 5%;
-  right: 5%;
+  top: 4%;
+  left: 4%;
+  right: 4%;
   height: 12%;
   min-height: 2.4em;
   display: flex;
@@ -1923,10 +1930,10 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
  */
 .digest-sources {
   position: absolute;
-  top: 24%;
+  top: 20%;
   left: 4%;
   right: 4%;
-  height: 46%;
+  bottom: 6%;
   pointer-events: none;
   z-index: 1;
 }
@@ -1934,15 +1941,16 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 .digest-source {
   position: absolute;
   top: 0;
-  width: 28%;
-  height: 90%;
+  bottom: 0;
+  width: 30%;
   background: var(--cream);
   border: 1px solid rgba(43,26,16,0.14);
   border-radius: 0.7em;
-  padding: 0.55em 0.65em;
+  padding: 0.75em 0.8em;
   box-shadow: 0 4px 12px -8px rgba(43,26,16,0.18);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 0.4em;
   will-change: transform, opacity;
   transform-origin: center center;
@@ -1950,33 +1958,37 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
     transform 0.7s cubic-bezier(0.6, 0.02, 0.32, 0.98),
     opacity 0.55s var(--ease);
 }
-.source-a { left: 2%; }
-.source-b { left: 36%; }
+.source-a { left: 0%; }
+.source-b { left: 35%; }
 .source-c { left: 70%; }
 
 .digest-source-icon {
-  width: 1.7em;
-  height: 1.7em;
+  width: 2.2em;
+  height: 2.2em;
   object-fit: contain;
-  border-radius: 0.3em;
+  border-radius: 0.35em;
+  flex: none;
 }
 .digest-source-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.1em;
+  justify-content: flex-end;
+  gap: 0.25em;
   min-width: 0;
 }
 .digest-source-l1 {
   font-family: var(--display);
   font-weight: 700;
-  font-size: 0.95em;
+  font-size: 1em;
   color: var(--forest);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.25;
 }
 .digest-source-l2 {
-  font-size: 0.82em;
+  font-size: 0.85em;
   color: var(--muted);
   line-height: 1.3;
   overflow: hidden;
@@ -2005,7 +2017,7 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 .digest-glow {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 55%;
   width: 30%;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -2032,11 +2044,11 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 /* ---- Summary card ---- */
 .digest-summary {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 22%;
-  min-height: 48%;
-  padding: 0.7em 0.9em;
+  left: 6%;
+  right: 6%;
+  top: 20%;
+  bottom: 20%;
+  padding: 0.9em 1em;
   background: var(--cream);
   border: 1.5px solid var(--orange);
   border-radius: 0.9em;
@@ -2045,7 +2057,8 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
     0 2px 6px -3px rgba(43,26,16,0.10);
   display: flex;
   flex-direction: column;
-  gap: 0.45em;
+  justify-content: center;
+  gap: 0.65em;
   opacity: 0;
   transform: scale(0.88);
   transition: opacity 0.45s var(--ease), transform 0.45s var(--ease);
@@ -2056,7 +2069,7 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   transform: scale(1);
 }
 .digest-summary.is-lifted {
-  transform: translateY(-2.5%) scale(1);
+  transform: translateY(-4%) scale(1);
 }
 
 .digest-summary-head {
@@ -2090,10 +2103,12 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.32em;
-  font-size: 0.9em;
+  gap: 0.5em;
+  font-size: 0.95em;
   color: var(--forest);
   min-width: 0;
+  flex: 1;
+  justify-content: center;
 }
 .digest-summary-list li {
   display: flex;
@@ -2272,18 +2287,10 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
     max-height: calc(100vh - 40px);
   }
   .works-modal-site-frame { min-height: 320px; }
-  .review-scene-card { font-size: 9px; }
-  .review-scene-full { font-size: 12px; }
   .review-scene-wrap-full { width: 100%; aspect-ratio: 4 / 3; max-height: 62vh; }
-  .support-chat-scene-card { font-size: 9px; }
-  .support-chat-scene-full { font-size: 12px; }
-  .support-chat-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
-  .payment-recon-scene-card { font-size: 9px; }
-  .payment-recon-scene-full { font-size: 12px; }
-  .payment-recon-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
-  .daily-digest-scene-card { font-size: 9px; }
-  .daily-digest-scene-full { font-size: 12px; }
-  .daily-digest-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
+  .support-chat-wrap-full { width: 100%; aspect-ratio: 4 / 3.2; max-height: 62vh; }
+  .payment-recon-wrap-full { width: 100%; aspect-ratio: 4 / 3.2; max-height: 62vh; }
+  .daily-digest-wrap-full { width: 100%; aspect-ratio: 4 / 3.2; max-height: 62vh; }
   .works-modal-head { padding: 18px 18px 14px; }
   .works-modal-body { padding: 20px 18px 24px; }
   .works-modal-flow-wrap { padding: 8px 0 16px; }
