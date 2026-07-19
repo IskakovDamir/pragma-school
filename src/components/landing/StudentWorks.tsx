@@ -3,6 +3,7 @@ import { FlowGraph, type FlowConfig } from "./FlowGraph";
 import { Modal } from "./Modal";
 import { ReviewMonitorScene } from "./ReviewMonitorScene";
 import { SupportChatScene } from "./SupportChatScene";
+import { PaymentReconScene } from "./PaymentReconScene";
 
 type SiteWork = {
   kind: "site";
@@ -15,7 +16,7 @@ type AgentWork = {
   kind: "agent";
   title: string;
   flow: FlowConfig;
-  scene?: "review-monitor" | "support-chat";
+  scene?: "review-monitor" | "support-chat" | "payment-recon";
 };
 
 type Work = SiteWork | AgentWork;
@@ -75,7 +76,7 @@ const WORKS: Work[] = [
   { kind: "site", title: "Aurora XR1", url: "https://www.auroraxr1.store/#vision", slug: "aurora" },
   { kind: "agent", title: "Первая линия поддержки", flow: flowSupport, scene: "support-chat" },
   { kind: "site", title: "Qyran", url: "https://www.qyran.online/", slug: "qyran" },
-  { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments },
+  { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments, scene: "payment-recon" },
   { kind: "site", title: "Planas Thai", url: "https://www.planasthai.space/", slug: "planasthai" },
   { kind: "agent", title: "Ассистент дня", flow: flowAssistant },
   { kind: "site", title: "Sayahat", url: "https://www.sayahat.site/", slug: "sayahat" },
@@ -138,6 +139,8 @@ function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
           <ReviewMonitorScene size="card" />
         ) : work.scene === "support-chat" ? (
           <SupportChatScene size="card" />
+        ) : work.scene === "payment-recon" ? (
+          <PaymentReconScene size="card" />
         ) : (
           <FlowGraph config={work.flow} size="mini" />
         )}
@@ -182,6 +185,8 @@ function AgentModalBody({ item }: { item: AgentWork }) {
   const caption =
     item.scene === "support-chat"
       ? "Простые вопросы агент закрывает сам, сложные передаёт команде и заводит карточку в CRM."
+      : item.scene === "payment-recon"
+      ? "Агент сверяет платежи с таблицей, обновляет статус сделки, отправляет чек и присылает сводку по деньгам за день."
       : item.flow.caption;
   return (
     <div className="works-modal-agent">
@@ -193,6 +198,10 @@ function AgentModalBody({ item }: { item: AgentWork }) {
         ) : item.scene === "support-chat" ? (
           <div className="support-chat-wrap-full">
             <SupportChatScene size="full" />
+          </div>
+        ) : item.scene === "payment-recon" ? (
+          <div className="payment-recon-wrap-full">
+            <PaymentReconScene size="full" />
           </div>
         ) : (
           <FlowGraph config={item.flow} size="full" />

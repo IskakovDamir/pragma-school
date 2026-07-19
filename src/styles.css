@@ -1443,6 +1443,352 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 }
 .support-toast-check svg { width: 78%; height: 78%; }
 
+/* ---------- Payment Reconciliation Scene ----------
+ * Real HTML finance UI for pos6 "Контроль оплат и сверка".
+ * Root has overflow:hidden; the header, incoming row, table, chip, CRM line,
+ * and toasts are absolutely positioned within bounded slots so nothing exits
+ * the frame. A JS-driven counter animates via rAF during cycle A's toasts.
+ */
+.payment-recon-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--whisper);
+  border-radius: 10px;
+  font-family: var(--sans);
+  color: var(--forest);
+  isolation: isolate;
+}
+.payment-recon-scene-card { font-size: 10px; }
+.payment-recon-scene-full { font-size: 15px; }
+
+.payment-recon-wrap-full {
+  width: min(90%, 780px);
+  aspect-ratio: 8 / 5.4;
+  max-height: 62vh;
+  margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.payment-header {
+  position: absolute;
+  top: 4%;
+  left: 5%;
+  right: 5%;
+  height: 12%;
+  min-height: 2.2em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8em;
+  padding: 0 0.2em;
+  border-bottom: 1px solid rgba(43,26,16,0.08);
+  z-index: 2;
+}
+.payment-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1em;
+  color: var(--forest);
+}
+.payment-header-src { width: 1.3em; height: 1.3em; object-fit: contain; border-radius: 0.25em; }
+.payment-header-total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  font-family: var(--display);
+  font-size: 0.9em;
+  color: var(--forest);
+  white-space: nowrap;
+}
+.payment-header-total-label { color: var(--muted); font-weight: 500; }
+.payment-header-total-value {
+  font-weight: 700;
+  color: var(--orange);
+  font-variant-numeric: tabular-nums;
+  min-width: 4em;
+  text-align: right;
+}
+
+/* ---- Incoming row ---- */
+.payment-incoming {
+  position: absolute;
+  top: 21%;
+  left: 5%;
+  right: 5%;
+  min-height: 14%;
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.14);
+  border-radius: 0.7em;
+  padding: 0.55em 0.7em;
+  box-shadow: 0 3px 8px -6px rgba(43,26,16,0.18);
+  opacity: 0;
+  transform: translateY(-0.4em);
+  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+}
+.payment-incoming.is-visible { opacity: 1; transform: translateY(0); }
+.payment-incoming-icon { width: 1.7em; height: 1.7em; object-fit: contain; flex: none; border-radius: 0.3em; }
+.payment-incoming-body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 0.05em; }
+.payment-incoming-line1 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.95em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.payment-incoming-line1 b { color: var(--orange); font-weight: 700; }
+.payment-incoming-line2 {
+  font-size: 0.82em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Status chip (floats top-right under the header) ---- */
+.payment-chip {
+  position: absolute;
+  top: 39%;
+  right: 5%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.78em;
+  border: 1px solid transparent;
+  opacity: 0;
+  transform: translateY(-0.15em) scale(0.94);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease),
+    background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 3;
+}
+.payment-chip.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+.payment-chip-dot {
+  width: 0.45em; height: 0.45em; border-radius: 50%;
+  background: currentColor;
+  animation: paymentChipDot 1.1s ease-in-out infinite;
+}
+@keyframes paymentChipDot {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+.payment-chip.tone-info {
+  background: var(--highlight);
+  color: var(--orange);
+  border-color: rgba(201,81,0,0.35);
+}
+.payment-chip.tone-success {
+  background: rgba(40,120,68,0.12);
+  color: #1e6b3a;
+  border-color: rgba(40,120,68,0.42);
+}
+.payment-chip.tone-warn {
+  background: rgba(196,90,20,0.16);
+  color: #7f3010;
+  border-color: rgba(196,90,20,0.42);
+}
+
+/* ---- Table ---- */
+.payment-table {
+  position: absolute;
+  top: 44%;
+  left: 5%;
+  right: 5%;
+  bottom: 22%;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.12);
+  border-radius: 0.6em;
+  padding: 0.5em 0.55em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.2em;
+  overflow: hidden;
+  z-index: 1;
+}
+.payment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 3.6em) minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.4em 0.6em;
+  border-radius: 0.4em;
+  font-size: 0.9em;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background 0.35s var(--ease), border-color 0.35s var(--ease),
+    color 0.35s ease;
+  min-height: 0;
+}
+.payment-row-no {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.payment-row-amount {
+  font-family: var(--display);
+  font-weight: 600;
+  color: var(--forest);
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.payment-row-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32em;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.82em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.payment-row-status-text { color: var(--muted); }
+.payment-row-check {
+  width: 1em; height: 1em;
+  border-radius: 50%;
+  background: rgba(40,120,68,0.18);
+  color: #1e6b3a;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.payment-row-check svg { width: 78%; height: 78%; }
+.payment-row.is-matched {
+  background: rgba(40,120,68,0.10);
+  border-color: rgba(40,120,68,0.35);
+  animation: paymentRowMatch 0.5s var(--ease);
+}
+.payment-row.is-matched .payment-row-status { color: #1e6b3a; }
+@keyframes paymentRowMatch {
+  0%   { background: rgba(40,120,68,0); box-shadow: 0 0 0 0 rgba(40,120,68,0); }
+  55%  { background: rgba(40,120,68,0.20); box-shadow: 0 0 0 0.35em rgba(40,120,68,0.14); }
+  100% { background: rgba(40,120,68,0.10); box-shadow: 0 0 0 0 rgba(40,120,68,0); }
+}
+
+/* Search sweep — element stays fixed; only background-position animates so
+   bounding box never exceeds the table. Height covers ~one row. */
+.payment-scan {
+  position: absolute;
+  inset: 0.5em;
+  border-radius: 0.4em;
+  background-image: linear-gradient(
+    180deg,
+    rgba(201,81,0,0) 0%,
+    rgba(201,81,0,0.28) 50%,
+    rgba(201,81,0,0) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 34%;
+  background-position: 0 0%;
+  animation: paymentScan 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+@keyframes paymentScan {
+  0%   { background-position: 0 0%; opacity: 1; }
+  90%  { background-position: 0 200%; opacity: 1; }
+  100% { background-position: 0 200%; opacity: 0; }
+}
+
+/* ---- CRM inline line ---- */
+.payment-crm {
+  position: absolute;
+  top: 80%;
+  left: 5%;
+  right: 5%;
+  height: 8%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2em 0.55em;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.78em;
+  color: #1e6b3a;
+  background: rgba(40,120,68,0.10);
+  border: 1px solid rgba(40,120,68,0.30);
+  border-radius: 999px;
+  width: max-content;
+  max-width: 90%;
+  opacity: 0;
+  transform: translateY(-0.15em);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+  z-index: 3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.payment-crm.is-visible { opacity: 1; transform: translateY(0); }
+.payment-crm img { width: 1.15em; height: 1.15em; object-fit: contain; border-radius: 0.2em; }
+
+/* ---- Toasts ---- */
+.payment-toasts {
+  position: absolute;
+  bottom: 4%;
+  right: 5%;
+  width: 62%;
+  max-width: 62%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35em;
+  z-index: 4;
+}
+.payment-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.4em 0.6em;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.16);
+  border-radius: 0.6em;
+  box-shadow: 0 4px 12px -8px rgba(43,26,16,0.22);
+  opacity: 0;
+  transform: translateY(0.35em) scale(0.96);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+.payment-toast.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+.payment-toast img { width: 1.25em; height: 1.25em; object-fit: contain; flex: none; border-radius: 0.2em; }
+.payment-toast-text {
+  min-width: 0;
+  flex: 1;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.8em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.payment-toast-check {
+  width: 1.1em; height: 1.1em; border-radius: 50%;
+  background: rgba(40,120,68,0.14);
+  color: #1e6b3a;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.payment-toast-check svg { width: 78%; height: 78%; }
+
 /* ---------- Modal ---------- */
 .works-modal-backdrop {
   position: fixed; inset: 0; z-index: 200;
@@ -1562,6 +1908,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .support-chat-scene-card { font-size: 9px; }
   .support-chat-scene-full { font-size: 12px; }
   .support-chat-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
+  .payment-recon-scene-card { font-size: 9px; }
+  .payment-recon-scene-full { font-size: 12px; }
+  .payment-recon-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
   .works-modal-head { padding: 18px 18px 14px; }
   .works-modal-body { padding: 20px 18px 24px; }
   .works-modal-flow-wrap { padding: 8px 0 16px; }
@@ -1585,4 +1934,7 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   /* Support chat: static representative frame — client Q + agent reply + toasts */
   .support-typing { display: none !important; }
   .support-chat-scene[data-stage="escalate-toasts"] .support-msg { transition: none !important; }
+  /* Payment recon: representative static frame — incoming + matched row + one toast */
+  .payment-scan { display: none !important; }
+  .payment-incoming, .payment-chip, .payment-crm, .payment-toast { opacity: 1 !important; transform: none !important; }
 }
