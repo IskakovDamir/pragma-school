@@ -1789,6 +1789,376 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 }
 .payment-toast-check svg { width: 78%; height: 78%; }
 
+/* ---------- Daily Digest Scene ----------
+ * Real HTML "morning digest" storyboard for pos8 "Ассистент дня".
+ * The signature move is convergence: three source cards translate toward the
+ * center, scale down and fade, an orange glow swells at the merge point, then
+ * a single summary card appears — visually distinct from the other scenes.
+ * Root has overflow:hidden; every element is inside bounded slots and the
+ * merge motion targets center positions that stay strictly inside the frame.
+ */
+.daily-digest-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--whisper);
+  border-radius: 10px;
+  font-family: var(--sans);
+  color: var(--forest);
+  isolation: isolate;
+}
+.daily-digest-scene-card { font-size: 10px; }
+.daily-digest-scene-full { font-size: 15px; }
+
+.daily-digest-wrap-full {
+  width: min(90%, 780px);
+  aspect-ratio: 8 / 5.6;
+  max-height: 62vh;
+  margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.digest-header {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  height: 12%;
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0 0.2em;
+  border-bottom: 1px solid rgba(43,26,16,0.08);
+  opacity: 0;
+  transform: translateY(-0.15em);
+  transition: opacity 0.32s var(--ease), transform 0.32s var(--ease);
+  z-index: 3;
+}
+.digest-header.is-visible { opacity: 1; transform: translateY(0); }
+
+.digest-header-clock {
+  position: relative;
+  width: 1.7em;
+  height: 1.7em;
+  color: var(--orange);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.digest-header-clock svg { width: 100%; height: 100%; }
+.digest-header-clock-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(201,81,0,0.35);
+  animation: digestClockPing 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes digestClockPing {
+  0%   { box-shadow: 0 0 0 0 rgba(201,81,0,0.35); }
+  70%  { box-shadow: 0 0 0 0.6em rgba(201,81,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(201,81,0,0); }
+}
+
+.digest-header-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+.digest-header-time { color: var(--orange); font-variant-numeric: tabular-nums; }
+.digest-header-sep { color: var(--muted); }
+.digest-header-label { color: var(--forest); font-weight: 600; }
+
+.digest-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.75em;
+  border-radius: 999px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.78em;
+  border: 1px solid transparent;
+  opacity: 0;
+  transform: translateY(-0.15em) scale(0.94);
+  transition: opacity 0.28s var(--ease), transform 0.28s var(--ease),
+    background 0.28s ease, color 0.28s ease, border-color 0.28s ease;
+  white-space: nowrap;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: none;
+}
+.digest-chip.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+.digest-chip-dot {
+  width: 0.45em; height: 0.45em; border-radius: 50%;
+  background: currentColor;
+  animation: paymentChipDot 1.1s ease-in-out infinite;
+}
+.digest-chip.tone-info {
+  background: var(--highlight);
+  color: var(--orange);
+  border-color: rgba(201,81,0,0.35);
+}
+.digest-chip.tone-success {
+  background: rgba(40,120,68,0.12);
+  color: #1e6b3a;
+  border-color: rgba(40,120,68,0.42);
+}
+
+/* ---- Source cards region ----
+ * Absolute positioning per column; transforms driven from JS `sourcePose()`
+ * so entrance / merge / hidden all use the same CSS transition.
+ */
+.digest-sources {
+  position: absolute;
+  top: 24%;
+  left: 4%;
+  right: 4%;
+  height: 46%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.digest-source {
+  position: absolute;
+  top: 0;
+  width: 28%;
+  height: 90%;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.14);
+  border-radius: 0.7em;
+  padding: 0.55em 0.65em;
+  box-shadow: 0 4px 12px -8px rgba(43,26,16,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  will-change: transform, opacity;
+  transform-origin: center center;
+  transition:
+    transform 0.7s cubic-bezier(0.6, 0.02, 0.32, 0.98),
+    opacity 0.55s var(--ease);
+}
+.source-a { left: 2%; }
+.source-b { left: 36%; }
+.source-c { left: 70%; }
+
+.digest-source-icon {
+  width: 1.7em;
+  height: 1.7em;
+  object-fit: contain;
+  border-radius: 0.3em;
+}
+.digest-source-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  min-width: 0;
+}
+.digest-source-l1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.digest-source-l2 {
+  font-size: 0.82em;
+  color: var(--muted);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Entry highlight — a brief warm ring when each source lights up. Runs once
+   per stage-entry via animation-delay tied to index. */
+.daily-digest-scene[data-stage="sources"] .source-a {
+  animation: digestSourceLit 0.65s var(--ease) 0ms;
+}
+.daily-digest-scene[data-stage="sources"] .source-b {
+  animation: digestSourceLit 0.65s var(--ease) 200ms;
+}
+.daily-digest-scene[data-stage="sources"] .source-c {
+  animation: digestSourceLit 0.65s var(--ease) 400ms;
+}
+@keyframes digestSourceLit {
+  0%   { box-shadow: 0 0 0 0 rgba(201,81,0,0), 0 4px 12px -8px rgba(43,26,16,0.18); border-color: rgba(201,81,0,0.6); }
+  55%  { box-shadow: 0 0 0 0.35em rgba(201,81,0,0.18), 0 6px 14px -8px rgba(43,26,16,0.22); border-color: var(--orange); }
+  100% { box-shadow: 0 0 0 0 rgba(201,81,0,0), 0 4px 12px -8px rgba(43,26,16,0.18); border-color: rgba(43,26,16,0.14); }
+}
+
+/* ---- Merge glow ---- */
+.digest-glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 30%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(201,81,0,0.55) 0%,
+    rgba(201,81,0,0.20) 40%,
+    rgba(201,81,0,0) 72%
+  );
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  pointer-events: none;
+  z-index: 2;
+}
+.digest-glow.is-active {
+  animation: digestGlow 0.8s ease-out forwards;
+}
+@keyframes digestGlow {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  55%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35); }
+}
+
+/* ---- Summary card ---- */
+.digest-summary {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 22%;
+  min-height: 48%;
+  padding: 0.7em 0.9em;
+  background: var(--cream);
+  border: 1.5px solid var(--orange);
+  border-radius: 0.9em;
+  box-shadow:
+    0 8px 22px -14px rgba(201,81,0,0.42),
+    0 2px 6px -3px rgba(43,26,16,0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45em;
+  opacity: 0;
+  transform: scale(0.88);
+  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease);
+  z-index: 3;
+}
+.digest-summary.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+.digest-summary.is-lifted {
+  transform: translateY(-2.5%) scale(1);
+}
+
+.digest-summary-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.digest-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.72em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--orange);
+  padding: 0.25em 0.6em;
+  border-radius: 999px;
+}
+.digest-summary-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.05em;
+  color: var(--forest);
+}
+
+.digest-summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32em;
+  font-size: 0.9em;
+  color: var(--forest);
+  min-width: 0;
+}
+.digest-summary-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.digest-summary-tick {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background: rgba(201,81,0,0.14);
+  color: var(--orange);
+  display: inline-grid;
+  place-items: center;
+}
+.digest-summary-tick svg { width: 78%; height: 78%; }
+
+/* ---- Telegram toast ---- */
+.digest-toast {
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  width: 68%;
+  max-width: 68%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 0.65em;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.16);
+  border-radius: 0.65em;
+  box-shadow: 0 6px 16px -10px rgba(43,26,16,0.28);
+  opacity: 0;
+  transform: translateY(0.4em) scale(0.96);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+  z-index: 4;
+}
+.digest-toast.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+.digest-toast img { width: 1.35em; height: 1.35em; object-fit: contain; flex: none; }
+.digest-toast-text {
+  min-width: 0;
+  flex: 1;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.82em;
+  color: var(--forest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.digest-toast-check {
+  width: 1.1em; height: 1.1em; border-radius: 50%;
+  background: rgba(40,120,68,0.14);
+  color: #1e6b3a;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.digest-toast-check svg { width: 78%; height: 78%; }
+
 /* ---------- Modal ---------- */
 .works-modal-backdrop {
   position: fixed; inset: 0; z-index: 200;
@@ -1911,6 +2281,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .payment-recon-scene-card { font-size: 9px; }
   .payment-recon-scene-full { font-size: 12px; }
   .payment-recon-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
+  .daily-digest-scene-card { font-size: 9px; }
+  .daily-digest-scene-full { font-size: 12px; }
+  .daily-digest-wrap-full { width: 100%; aspect-ratio: 4 / 3.4; max-height: 62vh; }
   .works-modal-head { padding: 18px 18px 14px; }
   .works-modal-body { padding: 20px 18px 24px; }
   .works-modal-flow-wrap { padding: 8px 0 16px; }
@@ -1937,4 +2310,8 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   /* Payment recon: representative static frame — incoming + matched row + one toast */
   .payment-scan { display: none !important; }
   .payment-incoming, .payment-chip, .payment-crm, .payment-toast { opacity: 1 !important; transform: none !important; }
+  /* Daily digest: static representative frame — three sources visible + summary */
+  .digest-header, .digest-chip, .digest-summary, .digest-toast { opacity: 1 !important; transform: none !important; }
+  .digest-source { opacity: 1 !important; transform: translateX(0) scale(1) !important; animation: none !important; }
+  .digest-glow, .digest-header-clock-ping { display: none !important; }
 }

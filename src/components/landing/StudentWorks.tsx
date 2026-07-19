@@ -4,6 +4,7 @@ import { Modal } from "./Modal";
 import { ReviewMonitorScene } from "./ReviewMonitorScene";
 import { SupportChatScene } from "./SupportChatScene";
 import { PaymentReconScene } from "./PaymentReconScene";
+import { DailyDigestScene } from "./DailyDigestScene";
 
 type SiteWork = {
   kind: "site";
@@ -16,7 +17,7 @@ type AgentWork = {
   kind: "agent";
   title: string;
   flow: FlowConfig;
-  scene?: "review-monitor" | "support-chat" | "payment-recon";
+  scene?: "review-monitor" | "support-chat" | "payment-recon" | "daily-digest";
 };
 
 type Work = SiteWork | AgentWork;
@@ -78,7 +79,7 @@ const WORKS: Work[] = [
   { kind: "site", title: "Qyran", url: "https://www.qyran.online/", slug: "qyran" },
   { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments, scene: "payment-recon" },
   { kind: "site", title: "Planas Thai", url: "https://www.planasthai.space/", slug: "planasthai" },
-  { kind: "agent", title: "Ассистент дня", flow: flowAssistant },
+  { kind: "agent", title: "Ассистент дня", flow: flowAssistant, scene: "daily-digest" },
   { kind: "site", title: "Sayahat", url: "https://www.sayahat.site/", slug: "sayahat" },
 ];
 
@@ -141,6 +142,8 @@ function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
           <SupportChatScene size="card" />
         ) : work.scene === "payment-recon" ? (
           <PaymentReconScene size="card" />
+        ) : work.scene === "daily-digest" ? (
+          <DailyDigestScene size="card" />
         ) : (
           <FlowGraph config={work.flow} size="mini" />
         )}
@@ -187,6 +190,8 @@ function AgentModalBody({ item }: { item: AgentWork }) {
       ? "Простые вопросы агент закрывает сам, сложные передаёт команде и заводит карточку в CRM."
       : item.scene === "payment-recon"
       ? "Агент сверяет платежи с таблицей, обновляет статус сделки, отправляет чек и присылает сводку по деньгам за день."
+      : item.scene === "daily-digest"
+      ? "По утрам агент собирает встречи, письма и задачи, а затем присылает короткую сводку дня одним сообщением."
       : item.flow.caption;
   return (
     <div className="works-modal-agent">
@@ -202,6 +207,10 @@ function AgentModalBody({ item }: { item: AgentWork }) {
         ) : item.scene === "payment-recon" ? (
           <div className="payment-recon-wrap-full">
             <PaymentReconScene size="full" />
+          </div>
+        ) : item.scene === "daily-digest" ? (
+          <div className="daily-digest-wrap-full">
+            <DailyDigestScene size="full" />
           </div>
         ) : (
           <FlowGraph config={item.flow} size="full" />
