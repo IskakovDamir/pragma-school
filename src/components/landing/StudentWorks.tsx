@@ -72,15 +72,15 @@ const flowAssistant: FlowConfig = {
 
 /* site titles provisional; real thumbnails can replace the wireframe later */
 const WORKS: Work[] = [
-  { kind: "site", title: "Mycelion", url: "https://www.mycelion.store/", slug: "mycelion" },
+  { kind: "site", title: "Магазин керамики", url: "https://www.mycelion.store/", slug: "mycelion" },
   { kind: "agent", title: "Мониторинг отзывов", flow: flowReviews, scene: "review-monitor" },
-  { kind: "site", title: "Aurora XR1", url: "https://www.auroraxr1.store/#vision", slug: "aurora" },
+  { kind: "site", title: "Промо AR-очков", url: "https://www.auroraxr1.store/#vision", slug: "aurora" },
   { kind: "agent", title: "Первая линия поддержки", flow: flowSupport, scene: "support-chat" },
-  { kind: "site", title: "Qyran", url: "https://www.qyran.online/", slug: "qyran" },
+  { kind: "site", title: "Личный сайт-портфолио", url: "https://www.qyran.online/", slug: "qyran" },
   { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments, scene: "payment-recon" },
-  { kind: "site", title: "Planas Thai", url: "https://www.planasthai.space/", slug: "planasthai" },
+  { kind: "site", title: "Тайский массаж-салон", url: "https://www.planasthai.space/", slug: "planasthai" },
   { kind: "agent", title: "Ассистент дня", flow: flowAssistant, scene: "daily-digest" },
-  { kind: "site", title: "Sayahat", url: "https://www.sayahat.site/", slug: "sayahat" },
+  { kind: "site", title: "Travel-агентство", url: "https://www.sayahat.site/", slug: "sayahat" },
 ];
 
 function extractDomain(url: string): string {
@@ -107,7 +107,7 @@ function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
         {showImg ? (
           <img
             className="site-mockup-shot"
-            src={`/works/${slug}.png`}
+            src={`/works/${slug}.webp`}
             alt=""
             onError={() => setImgFailed(true)}
             loading="lazy"
@@ -130,7 +130,6 @@ function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
 }
 
 function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
-  const tag = work.kind === "site" ? "Сайт" : "Автоматизация";
   return (
     <button type="button" className="work-card" onClick={onOpen}>
       <div className="work-preview">
@@ -149,11 +148,8 @@ function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
         )}
       </div>
       <div className="work-foot">
-        <div className="work-foot-top">
-          <span className="work-tag">{tag}</span>
-          <span className="work-hint">Открыть →</span>
-        </div>
         <div className="work-title">{work.title}</div>
+        <span className="work-hint">Открыть →</span>
       </div>
     </button>
   );
