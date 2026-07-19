@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { FlowGraph, type FlowConfig } from "./FlowGraph";
 import { Modal } from "./Modal";
+import { ReviewMonitorScene } from "./ReviewMonitorScene";
+import { SupportChatScene } from "./SupportChatScene";
 
 type SiteWork = {
   kind: "site";
@@ -13,6 +15,7 @@ type AgentWork = {
   kind: "agent";
   title: string;
   flow: FlowConfig;
+  scene?: "review-monitor" | "support-chat";
 };
 
 type Work = SiteWork | AgentWork;
@@ -68,9 +71,9 @@ const flowAssistant: FlowConfig = {
 /* site titles provisional; real thumbnails can replace the wireframe later */
 const WORKS: Work[] = [
   { kind: "site", title: "Mycelion", url: "https://www.mycelion.store/", slug: "mycelion" },
-  { kind: "agent", title: "Мониторинг отзывов", flow: flowReviews },
+  { kind: "agent", title: "Мониторинг отзывов", flow: flowReviews, scene: "review-monitor" },
   { kind: "site", title: "Aurora XR1", url: "https://www.auroraxr1.store/#vision", slug: "aurora" },
-  { kind: "agent", title: "Первая линия поддержки", flow: flowSupport },
+  { kind: "agent", title: "Первая линия поддержки", flow: flowSupport, scene: "support-chat" },
   { kind: "site", title: "Qyran", url: "https://www.qyran.online/", slug: "qyran" },
   { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments },
   { kind: "site", title: "Planas Thai", url: "https://www.planasthai.space/", slug: "planasthai" },
@@ -131,6 +134,10 @@ function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
       <div className="work-preview">
         {work.kind === "site" ? (
           <SiteMockup domain={extractDomain(work.url)} slug={work.slug} />
+        ) : work.scene === "review-monitor" ? (
+          <ReviewMonitorScene size="card" />
+        ) : work.scene === "support-chat" ? (
+          <SupportChatScene size="card" />
         ) : (
           <FlowGraph config={work.flow} size="mini" />
         )}
@@ -172,12 +179,26 @@ function SiteModalBody({ item }: { item: SiteWork }) {
 }
 
 function AgentModalBody({ item }: { item: AgentWork }) {
+  const caption =
+    item.scene === "support-chat"
+      ? "Простые вопросы агент закрывает сам, сложные передаёт команде и заводит карточку в CRM."
+      : item.flow.caption;
   return (
     <div className="works-modal-agent">
       <div className="works-modal-flow-wrap">
-        <FlowGraph config={item.flow} size="full" />
+        {item.scene === "review-monitor" ? (
+          <div className="review-scene-wrap-full">
+            <ReviewMonitorScene size="full" />
+          </div>
+        ) : item.scene === "support-chat" ? (
+          <div className="support-chat-wrap-full">
+            <SupportChatScene size="full" />
+          </div>
+        ) : (
+          <FlowGraph config={item.flow} size="full" />
+        )}
       </div>
-      <p className="works-modal-caption">{item.flow.caption}</p>
+      <p className="works-modal-caption">{caption}</p>
     </div>
   );
 }
@@ -214,7 +235,7 @@ export function StudentWorks() {
 
     let raf = 0;
     let last = performance.now();
-    const speed = 68;
+    const speed = 100;
 
     const step = (t: number) => {
       const dt = t - last;
