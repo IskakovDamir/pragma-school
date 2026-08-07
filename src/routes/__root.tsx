@@ -10,6 +10,19 @@ import {
 
 import appCss from "../styles.css?url";
 
+const SITE_URL = "https://edu.pragma.com.kz/";
+
+/**
+ * UNSET. Absolute URL of the 1200x630 share card used for og:image and
+ * twitter:image. No suitable asset exists in public/ today — works/*.webp are
+ * 480x300 (wrong ratio, would render cropped and blurry) and the logo is a
+ * square SVG, which most scrapers reject. twitter:card already promises
+ * summary_large_image, so until a real 1200x630 PNG/JPG lands here every share
+ * renders as a bare text link. Set this to its absolute URL and both tags start
+ * emitting; they stay off while it is null rather than shipping a broken src.
+ */
+const OG_IMAGE: string | null = null;
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
@@ -72,6 +85,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Pragma School" },
+      { property: "og:url", content: SITE_URL },
+      ...(OG_IMAGE
+        ? [
+            { property: "og:image", content: OG_IMAGE },
+            { name: "twitter:image", content: OG_IMAGE },
+          ]
+        : []),
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Pragma School" },
       {
@@ -81,7 +101,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "canonical", href: "https://edu.pragma.com.kz/" },
+      { rel: "canonical", href: SITE_URL },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

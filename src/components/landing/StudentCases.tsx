@@ -1,6 +1,16 @@
 {/* PLACEHOLDER student cases — replace photos (public/students/) and text with real ones */}
 import { useState } from "react";
 
+/**
+ * The "Истории наших учеников" section is hidden: all five people below are
+ * invented, and the section heading claims real results. Nothing has been
+ * deleted — the component, its data and its styles are intact. Flip this to
+ * true once real, attributable quotes exist and the section comes back exactly
+ * as it was. Hiding it removes the whole <section>, so the 80px .block padding
+ * goes with it and the neighbouring sections keep their normal 160px gap.
+ */
+const SHOW_STUDENT_CASES = false;
+
 type Case = {
   name: string;
   role: string;
@@ -53,6 +63,10 @@ export function StudentCases() {
 
   const prev = () => setIndex((i) => (i - 1 + total) % total);
   const next = () => setIndex((i) => (i + 1) % total);
+
+  // Returned after the hooks so hook order stays stable and the flag can be
+  // flipped without touching anything else.
+  if (!SHOW_STUDENT_CASES) return null;
 
   return (
     <section id="cases" className="block">
