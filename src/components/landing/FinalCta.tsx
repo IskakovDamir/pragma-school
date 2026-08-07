@@ -12,7 +12,7 @@ export function FinalCta() {
           <a className="btn btn-primary" href="#free">
             <span className="arrow">→</span> Забрать бесплатно
           </a>
-          <p className="reassure">Пришлём на почту, доступ навсегда.</p>
+          <p className="reassure">Доступ сразу, без оплаты</p>
         </div>
       </div>
     </section>

@@ -1,72 +1,32 @@
-{/* PLACEHOLDER student cases — replace photos (public/students/) and text with real ones */}
 import { useState } from "react";
+import { STUDENT_CASES } from "@/data/studentCases";
 
-/**
- * The "Истории наших учеников" section is hidden: all five people below are
- * invented, and the section heading claims real results. Nothing has been
- * deleted — the component, its data and its styles are intact. Flip this to
- * true once real, attributable quotes exist and the section comes back exactly
- * as it was. Hiding it removes the whole <section>, so the 80px .block padding
- * goes with it and the neighbouring sections keep their normal 160px gap.
- */
-const SHOW_STUDENT_CASES = false;
-
-type Case = {
-  name: string;
-  role: string;
-  initials: string;
-  quote: string;
-};
-
-const CASES: Case[] = [
-  {
-    name: "Арман Т.",
-    role: "Маркетолог",
-    initials: "АТ",
-    quote:
-      "Пришёл без технического бэкграунда и думал, что автоматизации это сложно и точно не про меня. К концу собрал бота, который сам собирает заявки из инсты и складывает их в таблицу. Больше не трачу вечера на ручной перенос данных, всё падает само.",
-  },
-  {
-    name: "Дана К.",
-    role: "Владелица небольшого агентства",
-    initials: "ДК",
-    quote:
-      "Мы тонули в рутине: отчёты, напоминания клиентам, выгрузки. На курсе я разобралась, как связать наши инструменты между собой, и собрала первую рабочую цепочку прямо по своей задаче. Наставник разобрал её и показал, где упростить.",
-  },
-  {
-    name: "Ержан С.",
-    role: "Аналитик",
-    initials: "ЕС",
-    quote:
-      "Больше всего зашло, что учат на живых кейсах. Я взял свою реальную задачу с еженедельным отчётом и автоматизировал её за время курса. То, на что уходил целый день, теперь готовится само к утру понедельника.",
-  },
-  {
-    name: "Мадина А.",
-    role: "Фрилансер",
-    initials: "МА",
-    quote:
-      "Хотела просто попробовать бесплатные уроки и осталась на полный курс. Теперь беру заказы на автоматизацию, хотя год назад даже не знала, что так можно зарабатывать. Готовые проекты с курса сразу пошли в портфолио.",
-  },
-  {
-    name: "Тимур Б.",
-    role: "Операционный менеджер",
-    initials: "ТБ",
-    quote:
-      "У нас в компании куча повторяющихся действий, и я давно хотел это разгрести. Разобрался, как собрать агента, который сам обрабатывает входящие обращения и отвечает по шаблону. Команда разгрузилась, а меня заметило руководство.",
-  },
-];
+/** First letter of the first two words of a name, for the no-photo avatar. */
+function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
 
 export function StudentCases() {
   const [index, setIndex] = useState(0);
-  const total = CASES.length;
-  const current = CASES[index];
+  const total = STUDENT_CASES.length;
+
+  // The section is gated on the data itself, not on a separate flag: no real,
+  // consented quotes means no section at all — no heading, no empty state, no
+  // skeleton. Returned after the hook so hook order stays stable.
+  if (total === 0) return null;
+
+  const current = STUDENT_CASES[index % total];
+  // A single case has nothing to page through, so the controls and the counter
+  // are not rendered at all.
+  const showControls = total > 1;
 
   const prev = () => setIndex((i) => (i - 1 + total) % total);
   const next = () => setIndex((i) => (i + 1) % total);
-
-  // Returned after the hooks so hook order stays stable and the flag can be
-  // flipped without touching anything else.
-  if (!SHOW_STUDENT_CASES) return null;
 
   return (
     <section id="cases" className="block">
@@ -74,68 +34,91 @@ export function StudentCases() {
         <div className="head-wrap center reveal">
           <div className="eyebrow">Результаты</div>
           <h2 className="h2">Истории наших учеников</h2>
-          <p className="section-lead">
-            Реальные задачи, которые они закрыли автоматизацией.
-          </p>
+          <p className="section-lead">Реальные задачи, которые они закрыли автоматизацией.</p>
         </div>
 
         <div className="cases">
           <article className="case-card">
-            {/* Real photos will live in public/students/. When ready, swap
-                the div below for <img class="case-photo-img" ... /> */}
-            <div className="case-photo" aria-hidden="true">
-              <span className="case-photo-initials">{current.initials}</span>
-            </div>
+            {current.photo ? (
+              <img
+                className="case-photo-img"
+                src={current.photo}
+                alt={current.name}
+                width={220}
+                height={293}
+                loading="lazy"
+              />
+            ) : (
+              <div className="case-photo case-photo-avatar" aria-hidden="true">
+                <span className="case-photo-initials">{initialsOf(current.name)}</span>
+              </div>
+            )}
             <div className="case-body">
-              <p className="case-quote">{current.quote}</p>
+              <blockquote className="case-quote">
+                {current.quote.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </blockquote>
               <div className="case-meta">
                 <strong className="case-name">{current.name}</strong>
                 <span className="case-role">{current.role}</span>
               </div>
+              {current.projectUrl && current.projectLabel ? (
+                <a
+                  className="case-project"
+                  href={current.projectUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {current.projectLabel} ↗
+                </a>
+              ) : null}
             </div>
           </article>
 
-          <div className="cases-controls">
-            <button
-              type="button"
-              className="case-arrow"
-              aria-label="Предыдущая история"
-              onClick={prev}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+          {showControls ? (
+            <div className="cases-controls">
+              <button
+                type="button"
+                className="case-arrow"
+                aria-label="Предыдущая история"
+                onClick={prev}
               >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <span className="cases-counter">
-              {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </span>
-            <button
-              type="button"
-              className="case-arrow"
-              aria-label="Следующая история"
-              onClick={next}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <span className="cases-counter">
+                {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+              </span>
+              <button
+                type="button"
+                className="case-arrow"
+                aria-label="Следующая история"
+                onClick={next}
               >
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
-          </div>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

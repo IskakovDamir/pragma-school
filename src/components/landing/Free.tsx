@@ -24,10 +24,14 @@ export function Free() {
               margin: "0 auto 26px",
             }}
           >
-            Пришлём на почту, доступ навсегда
+            Доступ сразу, без оплаты
           </p>
-          {/* TODO: wire free-lessons form */}
-          <a className="btn btn-primary" href="#">
+          <a
+            className="btn btn-primary"
+            href="https://pragme-edu.kz/app?course=teaser"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span className="arrow">→</span> Забрать бесплатно
           </a>
         </div>
