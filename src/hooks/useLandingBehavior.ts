@@ -109,10 +109,15 @@ export function useLandingBehavior() {
       });
     }
 
-    // Subtle parallax on hero sketches
+    // Subtle parallax on the hero sketches, plus the gutter pills at roughly a
+    // third of the rate so the two read as separate depth layers rather than one
+    // busy plane. The transform is written to the pill's slot, never to the pill
+    // itself: the pill's entrance keyframes own its transform, and a CSS
+    // animation outranks an inline style, so writing there would do nothing.
     let onParallaxScroll: (() => void) | undefined;
     if (!reduce) {
       const sketches = Array.from(document.querySelectorAll<HTMLElement>(".sketch"));
+      const pillSlots = Array.from(document.querySelectorAll<HTMLElement>(".hero-pill-slot"));
       let ticking = false;
       onParallaxScroll = () => {
         if (ticking) return;
@@ -122,6 +127,13 @@ export function useLandingBehavior() {
           sketches.forEach((s, i) => {
             const depth = (i % 2 === 0 ? 1 : -1) * (0.04 + i * 0.015);
             s.style.transform = `translateY(${y * depth}px)`;
+          });
+          // Written as a custom property that only the wide-screen rule reads,
+          // so the in-flow pill row below 1300px never drifts, and crossing the
+          // breakpoint cannot strand a stale transform on a static element.
+          pillSlots.forEach((s, i) => {
+            const depth = (i % 2 === 0 ? 1 : -1) * 0.016;
+            s.style.setProperty("--par-y", `${y * depth}px`);
           });
           ticking = false;
         });
