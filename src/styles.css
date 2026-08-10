@@ -343,16 +343,14 @@ h1.display {
 @media (min-width: 1300px) {
   /* --par-y is written by the scroll parallax in useLandingBehavior. */
   .hero-pill-slot { transform: translateY(var(--par-y, 0px)); }
-  /* hp-2 and hp-4 use a negative offset: they sit inside the 820px text column
-     but still clear the glyphs, which are inset from it. That is the "partly
-     behind the optical edge" reading. The inset is a property of the line
-     widths, so it holds at every width this rule applies to. */
+  /* Three tags now, so they alternate gutters — left, right, left — instead of
+     all three stacking down one side. hp-2 keeps a negative offset: it sits
+     inside the 820px text column but still clears the glyphs, which are inset
+     from it. All three coordinates are positions the six-pill layout already
+     used and that were checked against the headline's ink. */
   .hp-1 { top: 172px; right: calc(100% + 28px); --pill-rot: -4deg;   animation-delay: 0.55s; }
-  .hp-2 { top: 300px; right: calc(100% - 12px); --pill-rot: 3deg;    animation-delay: 0.66s; }
+  .hp-2 { top: 202px; left: calc(100% - 8px);   --pill-rot: 5deg;    animation-delay: 0.66s; }
   .hp-3 { top: 424px; right: calc(100% + 40px); --pill-rot: -2.5deg; animation-delay: 0.77s; }
-  .hp-4 { top: 202px; left: calc(100% - 8px);   --pill-rot: 5deg;    animation-delay: 0.60s; }
-  .hp-5 { top: 334px; left: calc(100% + 44px);  --pill-rot: -3.5deg; animation-delay: 0.71s; }
-  .hp-6 { top: 458px; left: calc(100% + 12px);  --pill-rot: 2deg;    animation-delay: 0.82s; }
 }
 /* Below 1300px: one centred, upright row under the CTAs. */
 @media (max-width: 1299px) {
@@ -2705,8 +2703,8 @@ footer { border-top: 1px solid rgba(43,26,16,0.14); padding: 64px 0 40px; }
   .subhead { margin-bottom: 26px; }
   .reassure { margin-top: 14px; }
   .hero-pills { margin-top: 14px; gap: 6px; padding: 0 22px; }
-  /* Three tags only — six wrap into a block that reads as a paragraph. */
-  .hero-pill-slot:nth-child(n + 4) { display: none; }
+  /* The nth-child(n + 4) rule that used to hide tags 4-6 here is gone: there are
+     only three now, and desktop shows the same three. */
   .hero-pill { font-size: 9px; padding: 5px 10px; gap: 6px; }
   .hero-pill::before { width: 4px; height: 4px; }
   .wrap { padding: 0 22px; }

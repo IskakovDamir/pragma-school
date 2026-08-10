@@ -27,17 +27,15 @@ const HERO_CARDS = [
 ];
 
 /**
- * Gutter pill tags. Order matters: the first three are the ones kept below
- * 860px, where they collapse into a single upright row under the CTAs.
+ * Gutter pill tags. Three, and the same three at every width — desktop used to
+ * carry six while mobile hid the last three, so the two made different promises.
+ * These are exactly the three that survived below 860px.
+ *
+ * Dropped with them: "материалы остаются навсегда". "Навсегда" is contingent on
+ * the platform continuing to exist, and it was the strongest unbacked claim on
+ * the page; the remaining three are all verifiable today.
  */
-const HERO_PILLS = [
-  "уроки в записи",
-  "куратор в чате",
-  "свой проект к финалу",
-  "живые разборы каждую неделю",
-  "материалы остаются навсегда",
-  "старт без опыта в коде",
-];
+const HERO_PILLS = ["уроки в записи", "куратор в чате", "свой проект к финалу"];
 
 export function Hero() {
   return (
@@ -113,7 +111,12 @@ export function Hero() {
           уроков и посмотри как это работает у тебя. Опыт в коде не нужен.
         </p>
         <div className="hero-cta anim d5">
-          <a className="btn btn-primary" href="#free">
+          <a
+            className="btn btn-primary"
+            href="https://pragme-edu.kz/app?course=teaser"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span className="arrow">→</span> Забрать 3 бесплатных урока
           </a>
           <a className="btn btn-soft" href="#tracks">

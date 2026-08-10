@@ -16,10 +16,21 @@ export function FinalCta() {
             <br />
             бесплатных уроков
           </h2>
-          <a className="btn btn-primary" href="#free">
+          {/* Straight to the teaser. This used to point at #free, which scrolled
+              the reader down to a block holding an identical button — a click
+              that bought nothing. */}
+          <a
+            className="btn btn-primary"
+            href="https://pragme-edu.kz/app?course=teaser"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span className="arrow">→</span> Забрать бесплатно
           </a>
-          <p className="reassure">Доступ сразу, без оплаты</p>
+          {/* Was "Доступ сразу, без оплаты", which also renders in the Free
+              block where the offer is actually explained. This is the hero's
+              own reassure line, verbatim — not a new claim. */}
+          <p className="reassure">Три урока и материалы. Без карты.</p>
         </div>
       </div>
     </section>
