@@ -716,8 +716,13 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
 .foot-socials a:hover { background: var(--orange); color: var(--cream); }
 .foot-socials svg { width: 16px; height: 16px; }
 
-/* ---------- Student works ---------- */
-.works .head-wrap { margin-bottom: 40px; }
+/* ---------- Student works ----------
+   The card shell speaks the hero's language; the preview inside it is not
+   touched. width, padding and border-width are load-bearing here: together
+   they fix .work-preview at 434x264, and cqmin (the smaller side, 262 content
+   px) is what all four scenes size their type from. Only radius, surface,
+   shadow, border-colour and transform change below. */
+.works .head-wrap { position: relative; }
 .works-viewport {
   position: relative;
   width: 100%;
@@ -739,7 +744,7 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   width: 480px;
   background: var(--cream);
   border: 1px solid rgba(43,26,16,0.14);
-  border-radius: var(--r-card);
+  border-radius: 16px;
   padding: 22px;
   color: var(--forest);
   text-align: left;
@@ -748,10 +753,34 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-shadow: rgba(43,26,16,0.10) 0 12px 26px -16px;
+  transform: rotate(var(--card-rot, 0deg));
   transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.3s ease;
 }
+/* Nine rotations, one per work, applied by index within a single set — so the
+   pattern's period is exactly the marquee's wrap period and card N looks
+   identical to card N+9. A period that did not divide 9 (alternating odd/even,
+   say) would put a different tilt either side of the seam and the wrap would
+   become visible. Rotation is safe for the measurement itself: the rAF loop
+   reads offsetLeft, which is a layout value and ignores transforms. */
+.wk-1 { --card-rot: -1.5deg; }
+.wk-2 { --card-rot:  1.1deg; }
+.wk-3 { --card-rot: -0.8deg; }
+.wk-4 { --card-rot:  1.6deg; }
+.wk-5 { --card-rot: -1.2deg; }
+.wk-6 { --card-rot:  0.9deg; }
+.wk-7 { --card-rot: -1.6deg; }
+.wk-8 { --card-rot:  1.3deg; }
+.wk-9 { --card-rot: -1.0deg; }
+/* Two tinted surfaces in nine, both existing tokens — the same cream / blush /
+   highlight mix as the hero cluster, spaced irregularly so the strip does not
+   read as a repeating pattern. */
+.wk-2 { background: var(--blush); }
+.wk-6 { background: var(--highlight); }
+/* Straighten-and-lift, matching .note:hover. The existing border-colour and
+   the "Открыть →" reveal are kept exactly as they were. */
 .work-card:hover {
-  transform: translateY(-6px);
+  transform: rotate(0deg) translateY(-6px);
   border-color: var(--orange);
   box-shadow: rgba(43,26,16,0.16) 0 18px 34px -16px;
 }
@@ -849,6 +878,35 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   position: relative;
 }
 .site-mockup-body:has(.site-mockup-shot) { padding: 0; }
+.site-mockup-body:has(.site-poster) { padding: 0; }
+
+/* Typographic tile for a work whose captured thumbnail is unusable — currently
+   sayahat only. It states the domain and the work's own title and invents
+   nothing. Sized from the same clamp(9px, 3.6cqmin, 18px) idiom the scenes
+   use, so it shrinks with the card at 860px instead of needing its own rule.
+   This is a new element: it cannot affect the scenes' own container query. */
+.site-poster {
+  position: absolute;
+  inset: 0;
+  background: var(--blush);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.55em;
+  padding: 0 8%;
+  font-size: clamp(9px, 3.6cqmin, 18px);
+}
+.site-poster-domain {
+  font-family: var(--mono); font-weight: 500;
+  font-size: 2.4em; line-height: 1.1; letter-spacing: -0.02em;
+  color: var(--orange);
+  overflow-wrap: anywhere;
+}
+.site-poster-label {
+  font-family: var(--sans); font-weight: 600;
+  font-size: 1.3em; line-height: 1.3;
+  color: var(--forest);
+}
 .site-mockup-nav { display: flex; gap: 8px; }
 .site-mockup-nav span {
   height: 6px; border-radius: 3px;
@@ -885,6 +943,44 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   object-position: top center;
   display: block;
   border-radius: 0;
+}
+
+/* ---------- Works pill tags ----------
+   Same treatment as .hero-pill and .track-pill. Declarations are repeated
+   rather than folded into a shared selector because the hero and Tracks are
+   both out of scope for this pass; extracting a common .pill-tag is the right
+   move on the next edit that legitimately touches all three. */
+.works-pills { display: contents; }
+.works-pill-slot { position: absolute; z-index: 2; pointer-events: none; }
+.works-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.14);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-family: var(--mono); font-size: 11px; line-height: 1.15;
+  color: var(--forest); white-space: nowrap;
+  box-shadow: rgba(43,26,16,0.10) 0 8px 18px -14px;
+  transform: rotate(var(--pill-rot, 0deg));
+}
+.works-pill::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--orange); flex: none;
+}
+/* Absolute only where the head-wrap actually has empty space to its right:
+   .section-lead caps at 520px, so above 1080px the right half is free. Below
+   that the tags become an in-flow row instead of colliding with the lead. */
+@media (min-width: 1080px) {
+  .wp-1 { top: 4px;   right: 4%;  --pill-rot: -3deg; }
+  .wp-2 { top: 64px;  right: 13%; --pill-rot: 2.5deg; }
+  .wp-3 { top: 124px; right: 2%;  --pill-rot: -2deg; }
+}
+@media (max-width: 1079px) {
+  .works-pills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px;
+  }
+  .works-pill-slot { position: static; }
+  .works-pill { --pill-rot: 0deg; }
 }
 
 /* ---------- Flow graph ----------
@@ -2568,8 +2664,16 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .case-photo, .case-photo-img { max-width: 200px; margin: 0 auto; }
   .track-foot { flex-wrap: wrap; gap: 14px; }
   .track-logos { flex-wrap: wrap; }
-  .work-card { width: 320px; padding: 16px; gap: 14px; }
+  /* Upright below 860px. Written explicitly: the rule that zeroes rotation at
+     this width is `.note.mint, .note.blush, .note.teal`, which is scoped to
+     those three tint classes and never matched .work-card. width, padding and
+     .work-preview's height stay exactly as they were — they fix the mobile
+     preview at 286x190 and therefore the scenes' cqmin. */
+  .work-card { width: 320px; padding: 16px; gap: 14px; transform: none; border-radius: 14px; }
   .work-preview { height: 190px; }
+  .works-pill { font-size: 9px; padding: 5px 10px; gap: 6px; }
+  .works-pill::before { width: 4px; height: 4px; }
+  .works-pills { margin-top: 16px; gap: 6px; }
   .work-preview > .flow-mini { transform: scale(1); }
   .work-title { font-size: 17px; min-height: calc(17px * 1.35 * 2); }
   .works-track { gap: 16px; padding: 8px 22px; }
@@ -2601,6 +2705,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .step-card, .track-card, .track-pill { transform: none !important; opacity: 1 !important; }
   .works-viewport { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
   .works-track { transform: none !important; }
+  /* Cards upright under reduced motion, like the hero and the two sections
+     before it. The tags start visible rather than relying on .reveal. */
+  .work-card, .works-pill { transform: none !important; opacity: 1 !important; }
   .flow-conn-fg { stroke-dashoffset: 0 !important; }
   .flow-pulse { display: none !important; }
   .flow-node { border-color: var(--orange) !important; }

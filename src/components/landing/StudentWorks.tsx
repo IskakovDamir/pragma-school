@@ -11,6 +11,12 @@ type SiteWork = {
   title: string;
   url: string;
   slug: string;
+  /**
+   * Set when the captured thumbnail is not usable — sayahat.webp is a 906-byte
+   * near-black loading splash, so the card renders a typographic tile instead
+   * of a black rectangle. Remove this once the screenshot is re-captured.
+   */
+  poster?: "typographic";
 };
 
 type AgentWork = {
@@ -74,14 +80,36 @@ const flowAssistant: FlowConfig = {
 const WORKS: Work[] = [
   { kind: "site", title: "Магазин керамики", url: "https://www.mycelion.store/", slug: "mycelion" },
   { kind: "agent", title: "Мониторинг отзывов", flow: flowReviews, scene: "review-monitor" },
-  { kind: "site", title: "Промо AR-очков", url: "https://www.auroraxr1.store/#vision", slug: "aurora" },
+  {
+    kind: "site",
+    title: "Промо AR-очков",
+    url: "https://www.auroraxr1.store/#vision",
+    slug: "aurora",
+  },
   { kind: "agent", title: "Первая линия поддержки", flow: flowSupport, scene: "support-chat" },
   { kind: "site", title: "Личный сайт-портфолио", url: "https://www.qyran.online/", slug: "qyran" },
   { kind: "agent", title: "Контроль оплат и сверка", flow: flowPayments, scene: "payment-recon" },
-  { kind: "site", title: "Тайский массаж-салон", url: "https://www.planasthai.space/", slug: "planasthai" },
+  {
+    kind: "site",
+    title: "Тайский массаж-салон",
+    url: "https://www.planasthai.space/",
+    slug: "planasthai",
+  },
   { kind: "agent", title: "Ассистент дня", flow: flowAssistant, scene: "daily-digest" },
-  { kind: "site", title: "Travel-агентство", url: "https://www.sayahat.site/", slug: "sayahat" },
+  {
+    kind: "site",
+    title: "Travel-агентство",
+    url: "https://www.sayahat.site/",
+    slug: "sayahat",
+    poster: "typographic",
+  },
 ];
+
+/**
+ * Pill tags beside the heading. Every string is a WORKS[].title rendered a few
+ * hundred pixels below — no new claim is made here.
+ */
+const WORKS_PILLS = ["Мониторинг отзывов", "Личный сайт-портфолио", "Контроль оплат и сверка"];
 
 function extractDomain(url: string): string {
   try {
@@ -92,9 +120,19 @@ function extractDomain(url: string): string {
   }
 }
 
-function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
+function SiteMockup({
+  domain,
+  slug,
+  poster,
+  label,
+}: {
+  domain?: string;
+  slug?: string;
+  poster?: "typographic";
+  label?: string;
+}) {
   const [imgFailed, setImgFailed] = useState(false);
-  const showImg = !!slug && !imgFailed;
+  const showImg = !!slug && !imgFailed && !poster;
   return (
     <div className="site-mockup" aria-hidden="true">
       <div className="site-mockup-chrome">
@@ -104,7 +142,14 @@ function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
         <div className="site-mockup-url">{domain ?? ""}</div>
       </div>
       <div className="site-mockup-body">
-        {showImg ? (
+        {poster ? (
+          /* Honest degradation, not a fabricated screenshot: the domain and the
+             work's own title on a tinted surface, in the card's shape. */
+          <div className="site-poster">
+            <span className="site-poster-domain">{domain ?? ""}</span>
+            {label ? <span className="site-poster-label">{label}</span> : null}
+          </div>
+        ) : showImg ? (
           <img
             className="site-mockup-shot"
             src={`/works/${slug}.webp`}
@@ -132,12 +177,23 @@ function SiteMockup({ domain, slug }: { domain?: string; slug?: string }) {
   );
 }
 
-function WorkCard({ work, onOpen }: { work: Work; onOpen: () => void }) {
+/**
+ * `variant` is the work's index within a single set (0-8), never the index in
+ * the doubled track. The rotation pattern therefore repeats with period 9,
+ * exactly the marquee's wrap period, so card N and card N+9 are identical and
+ * the seam stays invisible.
+ */
+function WorkCard({ work, onOpen, variant }: { work: Work; onOpen: () => void; variant: number }) {
   return (
-    <button type="button" className="work-card" onClick={onOpen}>
+    <button type="button" className={`work-card wk-${variant + 1}`} onClick={onOpen}>
       <div className="work-preview">
         {work.kind === "site" ? (
-          <SiteMockup domain={extractDomain(work.url)} slug={work.slug} />
+          <SiteMockup
+            domain={extractDomain(work.url)}
+            slug={work.slug}
+            poster={work.poster}
+            label={work.title}
+          />
         ) : work.scene === "review-monitor" ? (
           <ReviewMonitorScene size="card" />
         ) : work.scene === "support-chat" ? (
@@ -188,10 +244,10 @@ function AgentModalBody({ item }: { item: AgentWork }) {
     item.scene === "support-chat"
       ? "Простые вопросы агент закрывает сам, сложные передаёт команде и заводит карточку в CRM."
       : item.scene === "payment-recon"
-      ? "Агент сверяет платежи с таблицей, обновляет статус сделки, отправляет чек и присылает сводку по деньгам за день."
-      : item.scene === "daily-digest"
-      ? "По утрам агент собирает встречи, письма и задачи, а затем присылает короткую сводку дня одним сообщением."
-      : item.flow.caption;
+        ? "Агент сверяет платежи с таблицей, обновляет статус сделки, отправляет чек и присылает сводку по деньгам за день."
+        : item.scene === "daily-digest"
+          ? "По утрам агент собирает встречи, письма и задачи, а затем присылает короткую сводку дня одним сообщением."
+          : item.flow.caption;
   return (
     <div className="works-modal-agent">
       <div className="works-modal-flow-wrap">
@@ -288,6 +344,16 @@ export function StudentWorks() {
             Реальные сайты и автоматизации из финальных проектов. Наведи на любую карточку и открой,
             чтобы посмотреть внутри.
           </p>
+          {/* aria-hidden: each tag repeats a card title from the track below.
+              The slot carries .reveal's translate, the pill carries the
+              rotation, so neither transform overwrites the other. */}
+          <div className="works-pills" aria-hidden="true">
+            {WORKS_PILLS.map((pill, i) => (
+              <div key={pill} className={`works-pill-slot wp-${i + 1} reveal`} data-delay={i + 1}>
+                <span className="works-pill">{pill}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div
@@ -304,6 +370,7 @@ export function StudentWorks() {
             <WorkCard
               key={i}
               work={work}
+              variant={i % WORKS.length}
               onOpen={() => setOpenIndex(i % WORKS.length)}
             />
           ))}
