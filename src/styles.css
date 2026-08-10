@@ -698,23 +698,66 @@ section { position: relative; }
 /* ---------- Final CTA ---------- */
 .final { padding: 96px 0 100px; text-align: center; position: relative; overflow: hidden; }
 .final h2 { font-family: var(--display); font-weight: 800; font-size: clamp(34px, 5.4vw, 60px); line-height: 1.02; letter-spacing: -0.02em; margin-bottom: 30px; }
+/* Anchors the two floating tags without touching the section's own padding, so
+   the height stays where it was. */
+.final-inner { position: relative; }
 
-/* ---------- Footer ---------- */
-footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
-.foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
-.foot-brand p { font-size: 15px; color: var(--muted); max-width: 260px; margin-top: 16px; line-height: 1.55; }
-.foot-col-title { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b6b6b; margin: 0 0 16px; font-weight: 400; }
-.foot-col a { display: block; font-size: 15px; color: var(--forest); padding: 10px 0; opacity: 0.8; transition: opacity 0.2s; }
-.foot-col a:hover { opacity: 1; }
-.news { display: flex; gap: 8px; margin-top: 16px; max-width: 300px; }
-.news .btn { padding: 12px 18px; }
-.news input { flex: 1; min-width: 0; border: 1px solid var(--pencil); border-radius: var(--r-btn); padding: 12px 14px; font-family: var(--sans); font-size: 14px; background: var(--cream); color: var(--forest); }
-.news input:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
-.foot-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 24px; border-top: 1px solid var(--whisper); font-size: 13px; color: var(--muted); }
-.foot-socials { display: flex; gap: 10px; }
-.foot-socials a { width: 40px; height: 40px; border: 1px solid var(--pencil); border-radius: 8px; display: grid; place-items: center; transition: background 0.2s, color 0.2s; }
-.foot-socials a:hover { background: var(--orange); color: var(--cream); }
-.foot-socials svg { width: 16px; height: 16px; }
+/* ---------- Final CTA pill tags ----------
+   Same treatment as .hero-pill / .track-pill / .works-pill. Repeated rather
+   than folded into a shared selector because the hero, Tracks and works are all
+   out of scope this pass; a single .pill-tag is the right extraction on the
+   next edit that legitimately touches all four. */
+.final-pills { display: contents; }
+.final-pill-slot { position: absolute; z-index: 2; pointer-events: none; }
+.final-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.14);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-family: var(--mono); font-size: 11px; line-height: 1.15;
+  color: var(--forest); white-space: nowrap;
+  box-shadow: rgba(43,26,16,0.10) 0 8px 18px -14px;
+  transform: rotate(var(--pill-rot, 0deg));
+}
+.final-pill::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--orange); flex: none;
+}
+/* Absolute only where the centred column leaves clear gutters. Below 1080px
+   they would sit over the headline, so they become an in-flow centred row. */
+@media (min-width: 1080px) {
+  .fp-1 { top: 6px;   left: 4%;   --pill-rot: -4deg; }
+  .fp-2 { top: 120px; right: 3%;  --pill-rot: 3deg; }
+}
+@media (max-width: 1079px) {
+  .final-pills {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 8px; margin-bottom: 22px;
+  }
+  .final-pill-slot { position: static; }
+  .final-pill { --pill-rot: 0deg; }
+}
+
+/* ---------- Footer ----------
+   Three blocks, not four: the Школа and Ресурсы columns pointed at pages that
+   do not exist and were removed rather than left on `href="#"`. The hairlines
+   move from the cool --pencil/--whisper greys to the same warm
+   rgba(43,26,16,…) the cards and pills use, so the footer sits in the same
+   palette as everything above it. .news and .foot-socials are gone with the
+   markup they styled. */
+footer { border-top: 1px solid rgba(43,26,16,0.14); padding: 64px 0 40px; }
+.foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 40px; margin-bottom: 44px; }
+.foot-brand p { font-size: 15px; color: var(--muted); max-width: 300px; margin-top: 16px; line-height: 1.55; }
+.foot-col-title { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 14px; font-weight: 400; }
+.foot-col a { display: block; font-size: 15px; color: var(--forest); padding: 9px 0; opacity: 0.8; transition: opacity 0.2s, color 0.2s; }
+.foot-col a:hover { opacity: 1; color: var(--orange); }
+.foot-bottom {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding-top: 22px; border-top: 1px solid rgba(43,26,16,0.10); font-size: 13px; color: var(--muted);
+}
+.foot-bottom-cta { font-family: var(--sans); font-weight: 600; font-size: 14px; color: var(--orange); }
+.foot-bottom-cta:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- Student works ----------
    The card shell speaks the hero's language; the preview inside it is not
@@ -2590,7 +2633,16 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .burger { display: flex; }
   .notes, .steps, .foot-grid, .tracks { grid-template-columns: 1fr; }
   .note.mint, .note.blush, .note.teal { transform: rotate(0deg); }
-  .foot-grid { gap: 32px; }
+
+  /* ---- Footer, reflowed rather than stacked ----
+     Four full-width stacked columns made this the worst desktop-to-mobile
+     ratio on the page. The brand spans the row and the two link columns sit
+     side by side beneath it, which halves the link block's height. */
+  .foot-grid { grid-template-columns: 1fr 1fr; gap: 26px 20px; margin-bottom: 30px; }
+  .foot-brand { grid-column: 1 / -1; }
+  .foot-brand p { max-width: none; margin-top: 14px; }
+  .foot-col a { padding: 7px 0; }
+  .foot-bottom { padding-top: 18px; }
 
   /* ---- Steps, designed upright for this width ----
      The wave is replaced, not scaled: two short fixed-size vertical segments
@@ -2703,6 +2755,7 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   /* Same for the scattered Steps and Tracks cards and the track tags: the
      rotation lives on the card, which .reveal's own reset does not reach. */
   .step-card, .track-card, .track-pill { transform: none !important; opacity: 1 !important; }
+  .works-pill, .final-pill { transform: none !important; opacity: 1 !important; }
   .works-viewport { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
   .works-track { transform: none !important; }
   /* Cards upright under reduced motion, like the hero and the two sections
