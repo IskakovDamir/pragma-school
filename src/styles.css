@@ -415,17 +415,31 @@ section { position: relative; }
 .note h3 { font-family: var(--sans); font-weight: 600; font-size: 22px; margin-bottom: 10px; }
 .note p { font-size: 16px; line-height: 1.55; color: rgba(43,26,16,0.72); }
 
-/* ---------- Course tracks ---------- */
-.tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+/* ---------- Course tracks ----------
+   Same scattered language as the hero: opposing rotations, hover-straighten,
+   two-tone surfaces and floating mono pill tags. padding-top opens the band the
+   pills sit in; isolation keeps the pill/card z-order self-contained. */
+.tracks {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  position: relative; isolation: isolate; padding-top: 26px;
+}
+.track-wrap { position: relative; z-index: 1; display: flex; }
 .track-card {
-  display: flex; flex-direction: column; gap: 14px;
-  background: var(--cream); border-radius: var(--r-card);
+  display: flex; flex-direction: column; gap: 14px; flex: 1;
+  background: var(--cream); border-radius: 16px;
   padding: 32px; color: var(--forest);
   border: 1px solid rgba(43,26,16,0.14);
+  box-shadow: rgba(43,26,16,0.10) 0 12px 26px -16px;
+  transform: rotate(var(--card-rot, 0deg));
   transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
   will-change: transform;
 }
-.track-card:hover { transform: translateY(-6px); box-shadow: rgba(43,26,16,0.16) 0 18px 34px -16px; }
+/* Two-tone, both existing tokens: --blush, and --highlight (the accent at 16%)
+   as the light orange wash. Same pairing as hero cards 2 and 3. */
+.tk-1 { --card-rot: -1.4deg; background: var(--blush); }
+.tk-2 { --card-rot: 1.4deg;  background: var(--highlight); }
+/* Straighten-and-lift, matching .note:hover in the hero. */
+.track-card:hover { transform: rotate(0deg) translateY(-6px); box-shadow: rgba(43,26,16,0.16) 0 18px 34px -16px; }
 .track-eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--terracotta); }
 .track-card h3 { font-family: var(--display); font-weight: 800; font-size: 28px; letter-spacing: -0.02em; color: var(--orange); }
 .track-card > p { font-size: 16px; line-height: 1.55; color: rgba(43,26,16,0.72); }
@@ -464,16 +478,101 @@ section { position: relative; }
   50% { transform: translateY(-2px); }
 }
 
-/* ---------- How it works ---------- */
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; position: relative; }
-.step { position: relative; }
-.step-num { font-family: var(--mono); font-size: 14px; color: var(--terracotta); margin-bottom: 16px; letter-spacing: 0.06em; }
-.step-dot { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--orange); display: grid; place-items: center; margin-bottom: 18px; background: var(--cream); }
-.step-dot svg { width: 20px; height: 20px; }
-.step h3 { font-family: var(--sans); font-weight: 600; font-size: 21px; margin-bottom: 8px; }
-.step p { font-size: 16px; color: var(--muted); line-height: 1.55; }
-.steps-line { position: absolute; top: 23px; left: 12%; right: 12%; height: 2px; z-index: -1; }
-.steps-line svg { width: 100%; height: 20px; overflow: visible; }
+/* ---------- Track pill tags ----------
+   Visually identical to .hero-pill. The declarations are repeated rather than
+   folded into a shared selector because the hero is out of scope for this pass
+   and adding .track-pill to its rule would edit it. Slot / pill split copies
+   the hero's: the slot carries .reveal's translate, the pill carries the
+   rotation, so neither transform overwrites the other. */
+.track-pills { display: contents; }
+.track-pill-slot { position: absolute; z-index: 2; pointer-events: none; }
+.track-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--cream);
+  border: 1px solid rgba(43,26,16,0.14);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-family: var(--mono); font-size: 11px; line-height: 1.15;
+  color: var(--forest); white-space: nowrap;
+  box-shadow: rgba(43,26,16,0.10) 0 8px 18px -14px;
+  transform: rotate(var(--pill-rot, 0deg));
+}
+.track-pill::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--orange); flex: none;
+}
+/* Percentage offsets, so the three keep their spacing as the grid narrows.
+   tp-2 straddles the gap between the two cards. */
+.tp-1 { top: 0;   left: 2%;   --pill-rot: -3.5deg; }
+.tp-2 { top: 9px; left: 38%;  --pill-rot: 2.5deg; }
+.tp-3 { top: 1px; right: 3%;  --pill-rot: -2deg; }
+
+/* ---------- How it works ----------
+   The connector used to be a z-index: -1 element, which only stayed behind the
+   cards while no ancestor created a stacking context — rotating the cards is
+   exactly the change that breaks that. Fixed by making .steps an explicit
+   stacking context (isolation: isolate) and paying the layers in positive
+   order: connector 0, cards 1. Nothing here depends on z-index: -1, so a
+   transform, filter or opacity on any ancestor is now harmless. */
+.steps {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+  position: relative; isolation: isolate; padding-top: 58px;
+}
+.step-wrap { position: relative; z-index: 1; }
+/* Rotation and offset compose in one transform so the grid rows stay uniform —
+   the shift is visual, not layout, which keeps the section from growing by the
+   offset. Hover resolves both at once: straighten, unshift, lift. */
+.note.step-card {
+  border-radius: 16px;
+  padding: 26px 24px 28px;
+  background: var(--cream);
+  box-shadow: rgba(43,26,16,0.10) 0 12px 26px -16px;
+  transform: rotate(var(--card-rot, 0deg)) translateY(var(--card-shift, 0px));
+  display: flex; flex-direction: column; gap: 10px; height: 100%;
+}
+/* Written out rather than left to .note:hover: .note.step-card is declared
+   after it and at the same specificity, so it would otherwise win the cascade
+   and the card would never straighten. */
+.note.step-card:hover {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: rgba(43,26,16,0.16) 0 18px 34px -16px;
+}
+.sw-1 { --card-rot: -2.5deg; --card-shift: 0px;  }
+.sw-2 { --card-rot: 2deg;    --card-shift: 20px; }
+.sw-3 { --card-rot: -3deg;   --card-shift: 8px;  }
+.sw-2 .step-card { background: var(--blush); }
+
+.step-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+/* The number is now the graphic, not a label: mono, large, in the accent. */
+.step-num {
+  font-family: var(--mono); font-weight: 500; font-size: 42px; line-height: 0.9;
+  letter-spacing: -0.03em; color: var(--orange);
+}
+.step-dot { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--orange); display: grid; place-items: center; background: var(--cream); flex: none; }
+.step-dot svg { width: 18px; height: 18px; }
+.note.step-card h3 { font-family: var(--sans); font-weight: 600; font-size: 21px; margin: 0; }
+.note.step-card .step-desc { font-size: 16px; color: var(--muted); line-height: 1.55; }
+
+/* Both connectors carry .reveal so they fade in with the cards instead of
+   sitting alone in an otherwise blank section before hydration. The 0.3 lives
+   on the svg, never on the .reveal element: .reveal.is-visible sets opacity 1
+   at (0,2,0) and would drag the connector to full strength. */
+.steps-line {
+  position: absolute; left: -14px; right: -14px; top: 0; height: 112px;
+  z-index: 0; pointer-events: none; color: var(--orange);
+}
+/* Bottom-anchored: the svg keeps its aspect ratio as the container narrows, so
+   the troughs stay pinned under the card tops and only the crests get shorter.
+   Anchoring the top instead would lift the troughs clear of the cards at
+   narrow widths and the weave would read as a line floating above them. */
+.steps-line svg {
+  position: absolute; left: 0; bottom: 0; width: 100%; height: auto;
+  display: block; opacity: 0.3;
+}
+/* Mobile connector, sized in absolute units — see the 860px block. */
+.steps-link { display: none; justify-content: center; color: var(--orange); }
+.steps-link svg { display: block; opacity: 0.3; }
+.sl-2 svg { transform: scaleX(-1); }
 
 /* ---------- Callout ---------- */
 .callout-band { padding: 40px 0 80px; }
@@ -2394,9 +2493,37 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
   .nav-links, .nav-cta .btn-outline { display: none; }
   .burger { display: flex; }
   .notes, .steps, .foot-grid, .tracks { grid-template-columns: 1fr; }
-  .steps-line { display: none; }
   .note.mint, .note.blush, .note.teal { transform: rotate(0deg); }
   .foot-grid { gap: 32px; }
+
+  /* ---- Steps, designed upright for this width ----
+     The wave is replaced, not scaled: two short fixed-size vertical segments
+     sit in the stack where the horizontal connector used to vanish entirely.
+     The gap tightens to 10px because the segments now carry the spacing. */
+  .steps { padding-top: 0; gap: 10px; }
+  .steps-line { display: none; }
+  .steps-link { display: flex; }
+  .note.step-card { transform: none; padding: 20px 18px 22px; border-radius: 14px; }
+  .step-head { gap: 12px; }
+  .step-num { font-size: 32px; }
+  .step-dot { width: 34px; height: 34px; }
+  .step-dot svg { width: 16px; height: 16px; }
+  .note.step-card h3 { font-size: 19px; }
+
+  /* ---- Tracks, upright and stacked ----
+     The three tags collapse into a single row above the cards, the same move
+     the hero makes with its gutter pills at this width — but left-aligned
+     rather than centred, because unlike the hero's, this section's head-wrap
+     is left-aligned and a centred row under it reads as a stray element. */
+  .tracks { padding-top: 0; }
+  .track-card { transform: none; }
+  .track-pills {
+    display: flex; flex-wrap: wrap; justify-content: flex-start;
+    gap: 6px; margin-bottom: 16px;
+  }
+  .track-pill-slot { position: static; }
+  .track-pill { --pill-rot: 0deg; font-size: 9px; padding: 5px 10px; gap: 6px; }
+  .track-pill::before { width: 4px; height: 4px; }
 
   /* ---- Hero, designed upright for this width, not a scaled desktop ----
      Nothing here depends on rotation. Padding is tightened because the card
@@ -2469,6 +2596,9 @@ footer { border-top: 1px solid var(--pencil); padding: 64px 0 40px; }
      opacity 0 and are revealed by their own keyframes, so killing animation
      globally would leave them invisible without this. */
   .hero-card, .hero-pill { transform: none !important; opacity: 1 !important; }
+  /* Same for the scattered Steps and Tracks cards and the track tags: the
+     rotation lives on the card, which .reveal's own reset does not reach. */
+  .step-card, .track-card, .track-pill { transform: none !important; opacity: 1 !important; }
   .works-viewport { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
   .works-track { transform: none !important; }
   .flow-conn-fg { stroke-dashoffset: 0 !important; }
