@@ -116,7 +116,7 @@ export function Hero() {
           <a className="btn btn-primary" href="#free">
             <span className="arrow">→</span> Забрать 3 бесплатных урока
           </a>
-          <a className="btn btn-mint" href="#tracks">
+          <a className="btn btn-soft" href="#tracks">
             Смотреть курсы
           </a>
         </div>

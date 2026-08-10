@@ -4,28 +4,13 @@ export function Free() {
       <div className="wrap">
         <div className="callout reveal">
           <h2>Три бесплатных урока и полезные материалы</h2>
-          <p
-            style={{
-              color: "var(--cream)",
-              fontSize: "17px",
-              lineHeight: 1.55,
-              maxWidth: "560px",
-              margin: "-14px auto 12px",
-            }}
-          >
+          {/* The inline styles these two carried existed only to force cream text
+              onto the old orange slab. With the surface rebuilt they move to
+              .callout-lead / .callout-note in the stylesheet. Copy unchanged. */}
+          <p className="callout-lead">
             Посмотри как устроено обучение и собери свою первую маленькую автоматизацию без оплаты.
           </p>
-          <p
-            style={{
-              color: "var(--cream)",
-              fontFamily: "var(--mono)",
-              fontSize: "13px",
-              letterSpacing: "0.04em",
-              margin: "0 auto 26px",
-            }}
-          >
-            Доступ сразу, без оплаты
-          </p>
+          <p className="callout-note">Доступ сразу, без оплаты</p>
           <a
             className="btn btn-primary"
             href="https://pragme-edu.kz/app?course=teaser"
