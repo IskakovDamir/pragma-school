@@ -616,53 +616,60 @@ section { position: relative; }
 .callout-note { font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; color: var(--muted); margin: 0 auto 26px; }
 
 /* ---------- Student cases carousel ----------
-   The portraits in public/students/ are background-removed cutouts, and the
-   card lets one break its top edge. Two numbers hold that together, written as
-   custom properties so the mobile override only has to restate the numbers:
+   A portrait card: badge, headline, teaser, then the photograph in a washed
+   block filling the lower part of the card, with the name in that block's
+   bottom band.
 
-     --case-overhang  how far the portrait rises above the card's top border
-     --case-pad       the card's padding, which the portrait must also clear
+   The files in public/students/ are transparent cutouts with no background of
+   their own, so the block gives them something to sit on: --highlight, the
+   light wash this sheet already uses behind .tk-2, .wk-6 and .hc-3.
 
-   .case-card reserves the overhang as margin-top so a portrait can never
-   collide with the section heading above it; .case-figure spends it again as a
-   negative margin. Nothing in this subtree may take overflow: hidden — that
-   would slice every head off at the border. */
-.cases { max-width: 900px; margin: 0 auto; --case-overhang: 52px; }
+   The portrait is taller than the block's content box and stands on its floor,
+   so every head rises out of the top edge. That is why .case-photo-block keeps
+   overflow: visible and a z-index, and why it carries a margin-top — the head
+   lands in that margin rather than on the teaser's last line. Nothing here may
+   take overflow: hidden. The portrait breaks the block, never the card. */
+.cases {
+  /* Was 900px, when the card was a full-width horizontal panel. */
+  max-width: 360px;
+  margin: 0 auto;
+  /* The card is centred from here, not by a margin: 0 auto on .case-card —
+     it becomes one item in a rail, where centring itself would be wrong. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .case-card {
-  --case-pad: 32px;
+  --case-pad: 24px;
+  width: 100%;
+  max-width: 352px;
   background: var(--cream);
   border: 1px solid rgba(43,26,16,0.14);
   border-radius: var(--r-card);
   padding: var(--case-pad);
-  margin-top: var(--case-overhang);
-  display: grid;
-  /* 300px, not 240: under object-fit: contain a landscape cutout (Айсулу is
-     493x401) is limited by width, and a narrow column shrank her to two-thirds
-     the height of the portrait-shaped ones. */
-  grid-template-columns: 300px 1fr;
-  gap: 36px;
-  /* stretch, not center: .case-figure spans the full card height so the name
-     lands level with the last line of the quote. */
-  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
 }
 .case-card:hover { box-shadow: rgba(43,26,16,0.10) 0 18px 34px -16px; }
 
-/* Left rail: portrait pinned above the card by the negative margin,
-   attribution pushed to the bottom by space-between. The z-index is
-   belt-and-braces — a child already paints over its parent's background — but
-   it keeps the portrait in front if this card ever gains a decorative layer. */
-.case-figure {
+.case-photo-block {
   position: relative;
+  /* Above the teaser, so the overflowing head is never painted behind it. */
   z-index: 1;
+  /* 12px card gap + 44px = 56px, which clears the tallest overflow (53px). */
+  margin-top: 44px;
+  height: 245px;
+  /* The name's band. Also keeps the photo's fade clear of the name: the
+     portrait stands on the content box, 38px above the block's floor. */
+  padding-bottom: 38px;
+  border-radius: 10px;
+  background: var(--highlight);
+  overflow: visible;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  /* flex-start, not the default stretch: the portrait sizes itself from the
-     image's own ratio, and stretch would widen it back to the column. */
-  align-items: flex-start;
-  gap: 16px;
-  margin-top: calc(-1 * (var(--case-overhang) + var(--case-pad)));
+  align-items: flex-end;
+  justify-content: center;
 }
 .case-photo {
   width: 100%; aspect-ratio: 3 / 4;
@@ -675,33 +682,31 @@ section { position: relative; }
   font-family: var(--display); font-weight: 800;
   font-size: 40px; letter-spacing: -0.02em;
 }
-/* A cutout, so no frame, no radius and no grayscale: the border and rounding
-   that used to sit here drew a box around transparent pixels, and the top edge
-   of that box is exactly what the portrait is supposed to break.
+/* A cutout, so no frame, no radius and no grayscale: a border here would draw
+   a box around transparent pixels, and its top edge is what the portrait is
+   meant to break.
 
-   contain, not cover. A cutout has no background to crop into, so cover slices
-   the subject itself — it cut both of Дулат's arms off against the sides of the
-   box and left a flat vertical edge. contain never crops, at any of the five
-   aspect ratios (0.60 to 1.23), and the files are trimmed tight to the subject,
-   so anchoring the top puts every head on the same line regardless.
+   contain, never cover. A cutout has no background to crop into, so cover
+   slices the subject — it cut both of Дулат's arms off flat against the box.
 
-   Bounded by max-width/max-height rather than given a fixed box: a fixed box
-   letterboxes the landscape frame and leaves dead space under it, which on one
-   column reads as a gap between the portrait and the name. Taking the image's
-   own ratio inside those bounds means the box always ends where the subject does.
+   max-height 260 against the block's 207px content box: the difference is the
+   overflow. Four of the five are portrait frames and land on that cap, rising
+   53px out of the block. Айсулу is the one landscape frame (493x401), so she
+   is limited by width instead and sits about 13px lower — which is the point.
+   Matching her to the others would mean stretching her.
 
    The fade is not decoration. All five photographs run to the bottom of their
-   own frame, so every cutout ends in a hard horizontal line partway down the
-   card; this dissolves it into the card instead. */
+   own frame, so every cutout ends in a hard horizontal line; this dissolves it
+   into the wash instead. */
 .case-photo-img {
   display: block;
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: 300px;
+  max-height: 260px;
   aspect-ratio: auto;
   object-fit: contain;
-  object-position: center top;
+  object-position: center bottom;
   -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
   mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
 }
@@ -716,56 +721,52 @@ section { position: relative; }
   border: 1px solid var(--orange);
   color: var(--orange);
 }
-.case-body { display: flex; flex-direction: column; gap: 22px; }
-/* Badge and headline are one unit, so they sit inside their own wrapper rather
-   than inheriting .case-body's 22px gap, which is a paragraph gap, not a
-   label-to-heading gap. */
-.case-head { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-/* The track badge speaks .works-pill's language — mono, uppercase, fully
-   rounded — but carries the orange accent, since it is the one thing on this
-   card that classifies it. --orange-deep, not --orange: 11px is small text and
-   --orange measures 4.32:1 on cream, under AA. */
+/* The badge sizes to its label; without this the card's stretch alignment
+   would pull it to the full column width. */
 .case-track {
+  align-self: flex-start;
   display: inline-flex; align-items: center;
   border: 1px solid rgba(201,81,0,0.45);
   border-radius: 999px;
   padding: 5px 12px;
   font-family: var(--mono); font-size: 11px; line-height: 1.15;
   letter-spacing: 0.06em; text-transform: uppercase;
+  /* --orange-deep, not --orange: 11px is small text and --orange measures
+     4.32:1 on cream, under AA. */
   color: var(--orange-deep);
 }
+/* Was clamp(20px, 2.4vw, 26px) across a 498px column; 26px is too loud in a
+   304px one. */
 .case-headline {
   font-family: var(--display); font-weight: 800;
-  font-size: clamp(20px, 2.4vw, 26px);
-  line-height: 1.18; letter-spacing: -0.02em;
+  font-size: 21px;
+  line-height: 1.2; letter-spacing: -0.02em;
   color: var(--forest);
 }
-.case-quote {
+.case-teaser {
   font-family: var(--sans); font-weight: 400;
-  font-size: clamp(17px, 1.9vw, 20px);
-  line-height: 1.55; color: var(--forest);
+  font-size: 14px; line-height: 1.55;
+  color: var(--muted);
 }
-.case-quote p + p { margin-top: 14px; }
-/* Numbers inside a quote, marked up generically by highlightStats() in
-   StudentCases.tsx. --orange-deep again: this renders at body size, where
-   --orange's 4.32:1 on cream misses AA and --orange-deep's 5.01:1 clears it.
-   nowrap keeps space-grouped thousands ("240 000") on one line. */
+/* Numbers inside the teaser, marked up generically by highlightStats() in
+   StudentCases.tsx. --orange-deep again: 5.01:1 on cream where --orange's
+   4.32:1 misses AA. nowrap keeps grouped thousands ("240 000") on one line. */
 .stat-highlight {
   color: var(--orange-deep);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.case-project {
-  align-self: flex-start;
-  font-size: 14px; font-weight: 500; color: var(--orange);
-  border-bottom: 1px solid rgba(201,81,0,0.35);
-  transition: border-color 0.25s ease;
+/* In the block's bottom band, above the photo in the stack but never under it:
+   the portrait stops 38px short of the floor, so the two never meet. */
+.case-meta {
+  position: absolute;
+  left: 16px; bottom: 12px;
+  z-index: 2;
+  display: flex; flex-direction: column; gap: 2px;
 }
-.case-project:hover { border-bottom-color: var(--orange); }
-.case-meta { display: flex; flex-direction: column; gap: 2px; }
-.case-name { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--forest); }
-.case-role { font-size: 13px; color: var(--muted); }
+.case-name { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--forest); }
+.case-role { font-size: 12px; color: var(--muted); }
 
 .cases-controls {
   display: flex; align-items: center; justify-content: center;
@@ -2787,15 +2788,6 @@ footer { border-top: 1px solid rgba(43,26,16,0.14); padding: 64px 0 40px; }
   .hero-pill::before { width: 4px; height: 4px; }
   .wrap { padding: 0 22px; }
   .callout { padding: 44px 26px; }
-  /* One column: portrait and name centre above the text. Only the two numbers
-     behind the break-out change — .case-figure's negative margin is written in
-     terms of them and follows on its own. */
-  .cases { --case-overhang: 40px; }
-  .case-card { --case-pad: 24px; grid-template-columns: 1fr; gap: 24px; }
-  .case-figure { align-items: center; text-align: center; }
-  .case-photo, .case-photo-img { max-width: 240px; margin-left: auto; margin-right: auto; }
-  .case-photo-img { max-height: 260px; }
-  .case-meta { align-items: center; }
   .track-foot { flex-wrap: wrap; gap: 14px; }
   .track-logos { flex-wrap: wrap; }
   /* Upright below 860px, written explicitly — nothing else zeroes rotation at

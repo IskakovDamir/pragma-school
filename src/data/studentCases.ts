@@ -28,9 +28,9 @@
  *     404s. It bit exactly the two names containing "й" and left the other
  *     three working, which is the kind of half-broken that reaches production.
  *     ASCII names cannot be normalised into a different byte string.
- *   - They are cropped tight to the subject. The card lets the portrait break
- *     its top edge, and that only lands on the same line for every student if
- *     none of them carries transparent padding above the head.
+ *   - They are cropped tight to the subject. The portrait breaks the top edge
+ *     of the card's photo block, and that only lands on the same line for every
+ *     student if none of them carries transparent padding above the head.
  */
 
 /** The two courses offered on this page, matching the <h3>s in Tracks.tsx. */
@@ -53,7 +53,12 @@ export type StudentCase = {
    * has one worth stating separately.
    */
   role?: string;
-  /** One or more paragraphs, in the student's own words. */
+  /** Two or three lines. This is what the card shows. */
+  teaser: string;
+  /**
+   * One or more paragraphs, in the student's own words. Not rendered on the
+   * card — reserved as the source for the detail page.
+   */
   quote: string[];
   photo?: string;
   projectUrl?: string;
@@ -64,7 +69,9 @@ export const STUDENT_CASES: StudentCase[] = [
   {
     name: "Айсулу",
     track: "personal",
-    headline: "Поиск квартиры в аренду",
+    headline: "Поиск квартиры",
+    teaser:
+      "Объявления приходят в чат через 3 минуты после публикации, отфильтрованные по нужному району и цене.",
     quote: [
       "Я искала квартиру в аренду и постоянно опаздывала: хорошие варианты разбирали в течение часа, а я узнавала о них вечером, после работы. Настроила систему, которая круглосуточно отслеживает объявления, отсеивает по району, этажу и цене и присылает подходящее прямо в чат через 3 минуты после публикации. За неделю у меня было 6 приглашений на просмотр, и 4 из них пришли по объявлениям младше 20 минут.",
     ],
@@ -73,7 +80,9 @@ export const STUDENT_CASES: StudentCase[] = [
   {
     name: "Дулат",
     track: "corporate",
-    headline: "Юрист строительной компании, проверка договоров подряда",
+    headline: "Проверка договоров",
+    teaser:
+      "Агент сверяет договор подряда с шаблоном компании и выдаёт расхождения по пунктам. 40 минут превратились в 6.",
     quote: [
       "На проверку одного договора подряда у меня уходило 40 минут: сверить пункты с шаблоном компании и найти расхождения. Собрал агента, который делает это сам и выдаёт список расхождений с номерами пунктов. Модель развёрнута на сервере компании, тексты договоров не покидают периметр, и без этого условия служба безопасности проект бы не согласовала. Сейчас проверка занимает 6 минут, а за первый месяц через агента прошло 180 договоров.",
     ],
@@ -82,7 +91,9 @@ export const STUDENT_CASES: StudentCase[] = [
   {
     name: "Максим",
     track: "corporate",
-    headline: "Интернет-магазин, заказы с маркетплейсов",
+    headline: "Заказы с маркетплейсов",
+    teaser:
+      "Три площадки сходятся в одну таблицу, склад получает задание сам. Просрочка упала с 12% до 1,5%.",
     quote: [
       "Просрочка отгрузки доходила до 12%, и штрафы площадок съедали часть прибыли месяца. Настроил систему, которая собирает заказы с трёх площадок в одну таблицу, обновляет статусы каждые 15 минут и отправляет складу задание на сборку без моего участия. Она работает и в выходные, и в 4 утра. Просрочка упала до 1,5%, а штрафы за месяц снизились на 240 000 тенге.",
     ],
@@ -91,7 +102,9 @@ export const STUDENT_CASES: StudentCase[] = [
   {
     name: "Айнур",
     track: "corporate",
-    headline: "Сеть кофеен, утренняя сводка по точкам",
+    headline: "Сводка по кофейням",
+    teaser:
+      "Каждое утро в 8:30 приходит одно сообщение: выручка по каждой точке и отклонение от плана.",
     quote: [
       "Раньше я узнавала цифры по точкам от управляющих и получала их только к обеду четверга. Теперь каждый день в 8:30 приходит одно сообщение: выручка по каждой точке, отклонение от плана и списания. Данные из кассовой системы никуда не выгружаются, вся обработка идёт внутри. Провал по одной из точек я вижу уже на третий день, и за счёт этого получилось вернуть около 900 000 тенге месячной выручки.",
     ],
@@ -101,6 +114,7 @@ export const STUDENT_CASES: StudentCase[] = [
     name: "Александр",
     track: "personal",
     headline: "Родительская логистика",
+    teaser: "Кружки, дни рождения, оплаты и медосмотры в одном календаре с напоминанием заранее.",
     quote: [
       "Раньше я держал в голове расписание кружков, дни рождения одноклассников, сроки оплаты и медосмотров, и дважды в итоге платил пеню за просрочку. Собрал календарь, который сводит всё это в одном месте и присылает напоминание заранее, за нужное количество дней. За полгода не пропустил ни одной оплаты.",
     ],

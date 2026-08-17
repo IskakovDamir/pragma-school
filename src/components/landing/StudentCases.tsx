@@ -90,17 +90,23 @@ export function StudentCases() {
 
         <div className="cases">
           <article className="case-card">
-            {/* Portrait and attribution share the left rail: the cutout breaks
-                the card's top edge, the name sits level with the end of the
-                quote. Both are decided in CSS — see .case-figure. */}
-            <div className="case-figure">
+            <span className="case-track">{TRACK_LABEL[current.track]}</span>
+            <h3 className="case-headline">{current.headline}</h3>
+            {/* current.quote is deliberately not rendered here — the card shows
+                the teaser, and the full text is the detail page's material. */}
+            <p className="case-teaser">{highlightStats(current.teaser)}</p>
+
+            {/* The portrait is taller than this block's content box and sits on
+                its floor, so the head rises out of the top edge into the margin
+                above. Kept in CSS — see .case-photo-block. */}
+            <div className="case-photo-block">
               {current.photo ? (
                 <img
                   className="case-photo-img"
                   src={current.photo}
                   alt={current.name}
-                  width={300}
-                  height={300}
+                  width={304}
+                  height={260}
                   loading="lazy"
                   decoding="async"
                 />
@@ -113,28 +119,6 @@ export function StudentCases() {
                 <strong className="case-name">{current.name}</strong>
                 {current.role ? <span className="case-role">{current.role}</span> : null}
               </div>
-            </div>
-
-            <div className="case-body">
-              <div className="case-head">
-                <span className="case-track">{TRACK_LABEL[current.track]}</span>
-                <h3 className="case-headline">{current.headline}</h3>
-              </div>
-              <blockquote className="case-quote">
-                {current.quote.map((paragraph, i) => (
-                  <p key={i}>{highlightStats(paragraph)}</p>
-                ))}
-              </blockquote>
-              {current.projectUrl && current.projectLabel ? (
-                <a
-                  className="case-project"
-                  href={current.projectUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {current.projectLabel} ↗
-                </a>
-              ) : null}
             </div>
           </article>
 
