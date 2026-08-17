@@ -629,20 +629,35 @@ section { position: relative; }
    overflow: visible and a z-index, and why it carries a margin-top — the head
    lands in that margin rather than on the teaser's last line. Nothing here may
    take overflow: hidden. The portrait breaks the block, never the card. */
-.cases {
-  /* Was 900px, when the card was a full-width horizontal panel. */
-  max-width: 360px;
-  margin: 0 auto;
-  /* The card is centred from here, not by a margin: 0 auto on .case-card —
-     it becomes one item in a rail, where centring itself would be wrong. */
+/* .cases keeps the section's normal centred width so the controls line up with
+   the heading; .cases-rail is the scroller and is the only thing that bleeds. */
+.cases { max-width: none; }
+.cases-rail {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Bleeds right to the viewport edge so the next card is cut by the screen,
+     not by a container edge — the clip is the affordance. The left edge stays
+     on .wrap's gutter, so the rail still starts in line with every other
+     section. -32px of the padding is spent on an end gutter for the last card. */
+  margin-right: calc(50% - 50vw);
+  padding-right: 32px;
+  /* Room for .case-card's hover shadow, which reaches ~19px below the card.
+     overflow-x: auto forces overflow-y to auto, so without this the shadow
+     would be clipped and could raise a vertical scrollbar. */
+  padding-top: 4px;
+  padding-bottom: 26px;
+  /* Visually hidden, still scrollable by trackpad, touch and arrow keys. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.cases-rail::-webkit-scrollbar { display: none; }
+.cases-rail:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; border-radius: 4px; }
 .case-card {
   --case-pad: 24px;
-  width: 100%;
-  max-width: 352px;
+  flex: 0 0 352px;
+  scroll-snap-align: start;
   background: var(--cream);
   border: 1px solid rgba(43,26,16,0.14);
   border-radius: var(--r-card);
@@ -665,7 +680,15 @@ section { position: relative; }
      portrait stands on the content box, 38px above the block's floor. */
   padding-bottom: 38px;
   border-radius: 10px;
-  background: var(--highlight);
+  /* The same accent as --highlight, at 0.10 instead of 0.16. Not the token
+     itself: --highlight also backs .tk-2, .wk-6, .hc-3 and the step icons,
+     where a single block at 0.16 is right. Here three or four blocks sit side
+     by side in the rail, and at 0.16 they added up to a peach band that pulled
+     the whole section warmer than any other on the page — and swallowed
+     Дулат's pink shirt into a single monochrome field. 0.10 still gives the
+     cutouts a ground and still unifies five photographs shot in very different
+     light, without the section reading as orange. */
+  background: rgba(201, 81, 0, 0.10);
   overflow: visible;
   display: flex;
   align-items: flex-end;
@@ -743,9 +766,14 @@ section { position: relative; }
   line-height: 1.2; letter-spacing: -0.02em;
   color: var(--forest);
 }
+/* Reserves three lines whatever the teaser's length. In a rail the cards sit
+   side by side, so a two-line teaser (Айсулу's) would otherwise lift its photo
+   block above its neighbours' and leave dead space at the foot of the card.
+   Three is the ceiling too — the longest teaser is 96 characters. */
 .case-teaser {
   font-family: var(--sans); font-weight: 400;
   font-size: 14px; line-height: 1.55;
+  min-height: calc(14px * 1.55 * 3);
   color: var(--muted);
 }
 /* Numbers inside the teaser, marked up generically by highlightStats() in
@@ -780,13 +808,22 @@ section { position: relative; }
   transition: background 0.25s ease, color 0.25s ease, transform 0.35s var(--ease);
 }
 .case-arrow svg { width: 18px; height: 18px; }
-.case-arrow:hover { background: var(--orange); color: var(--cream); transform: translateY(-2px); }
-.case-arrow:active { transform: translateY(0); }
-.cases-counter {
-  font-family: var(--mono); font-size: 13px;
-  letter-spacing: 0.06em; color: var(--muted);
-  min-width: 72px; text-align: center;
+.case-arrow:hover:not(:disabled) { background: var(--orange); color: var(--cream); transform: translateY(-2px); }
+.case-arrow:active:not(:disabled) { transform: translateY(0); }
+/* The rail does not wrap around, so both ends are dead ends and say so. */
+.case-arrow:disabled { opacity: 0.3; cursor: default; }
+/* Replaces the old "01 / 05" counter, which stopped meaning anything once
+   three cards share the screen. Same slot, same 72px, between the arrows. */
+.cases-dots {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; min-width: 72px;
 }
+.cases-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(43,26,16,0.20);
+  transition: background 0.25s ease, transform 0.25s var(--ease);
+}
+.cases-dot.is-active { background: var(--orange-deep); transform: scale(1.3); }
 
 /* ---------- FAQ ---------- */
 .faq-grid { max-width: 760px; margin: 0 auto; }

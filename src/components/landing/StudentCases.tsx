@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { STUDENT_CASES, TRACK_LABEL } from "@/data/studentCases";
 
 /** First letter of the first two words of a name, for the no-photo avatar. */
@@ -63,21 +63,56 @@ function highlightStats(text: string): ReactNode[] {
 }
 
 export function StudentCases() {
-  const [index, setIndex] = useState(0);
+  const railRef = useRef<HTMLDivElement>(null);
+  // Index of the leftmost card that is not clipped on the left — what the dots
+  // report. All five cards are always mounted; only the scroll offset changes.
+  const [active, setActive] = useState(0);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
   const total = STUDENT_CASES.length;
+
+  /** One card plus one gap, measured rather than hardcoded. */
+  const stepPx = useCallback(() => {
+    const rail = railRef.current;
+    const card = rail?.querySelector<HTMLElement>(".case-card");
+    if (!rail || !card) return 0;
+    return card.offsetWidth + (parseFloat(getComputedStyle(rail).columnGap) || 0);
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const update = () => {
+      const railLeft = rail.getBoundingClientRect().left;
+      const cards = Array.from(rail.querySelectorAll<HTMLElement>(".case-card"));
+      // -1 absorbs sub-pixel scroll offsets, which would otherwise read the
+      // snapped card as one pixel clipped and skip the dot forward.
+      const first = cards.findIndex((c) => c.getBoundingClientRect().left >= railLeft - 1);
+      setActive(first === -1 ? cards.length - 1 : first);
+      setAtStart(rail.scrollLeft <= 1);
+      setAtEnd(rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1);
+    };
+
+    update();
+    rail.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      rail.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  const scrollByCard = (direction: 1 | -1) =>
+    railRef.current?.scrollBy({ left: direction * stepPx(), behavior: "smooth" });
 
   // The section is gated on the data itself, not on a separate flag: no real,
   // consented quotes means no section at all — no heading, no empty state, no
-  // skeleton. Returned after the hook so hook order stays stable.
+  // skeleton. Returned after the hooks so hook order stays stable.
   if (total === 0) return null;
 
-  const current = STUDENT_CASES[index % total];
-  // A single case has nothing to page through, so the controls and the counter
-  // are not rendered at all.
+  // A single case has nothing to page through.
   const showControls = total > 1;
-
-  const prev = () => setIndex((i) => (i - 1 + total) % total);
-  const next = () => setIndex((i) => (i + 1) % total);
 
   return (
     <section id="cases" className="block">
@@ -89,38 +124,52 @@ export function StudentCases() {
         </div>
 
         <div className="cases">
-          <article className="case-card">
-            <span className="case-track">{TRACK_LABEL[current.track]}</span>
-            <h3 className="case-headline">{current.headline}</h3>
-            {/* current.quote is deliberately not rendered here — the card shows
-                the teaser, and the full text is the detail page's material. */}
-            <p className="case-teaser">{highlightStats(current.teaser)}</p>
+          {/* tabIndex makes the scroller itself a tab stop, which is what gives
+              it arrow-key scrolling: the cards carry no interactive content of
+              their own yet, and giving static <article>s a tabindex would add
+              focus stops with nothing to do at them. */}
+          <div
+            className="cases-rail"
+            ref={railRef}
+            tabIndex={0}
+            role="group"
+            aria-label="Истории учеников"
+          >
+            {STUDENT_CASES.map((student) => (
+              <article className="case-card" key={student.name}>
+                <span className="case-track">{TRACK_LABEL[student.track]}</span>
+                <h3 className="case-headline">{student.headline}</h3>
+                {/* student.quote is deliberately not rendered here — the card
+                    shows the teaser, the full text is the detail page's. */}
+                <p className="case-teaser">{highlightStats(student.teaser)}</p>
 
-            {/* The portrait is taller than this block's content box and sits on
-                its floor, so the head rises out of the top edge into the margin
-                above. Kept in CSS — see .case-photo-block. */}
-            <div className="case-photo-block">
-              {current.photo ? (
-                <img
-                  className="case-photo-img"
-                  src={current.photo}
-                  alt={current.name}
-                  width={304}
-                  height={260}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="case-photo case-photo-avatar" aria-hidden="true">
-                  <span className="case-photo-initials">{initialsOf(current.name)}</span>
+                {/* The portrait is taller than this block's content box and sits
+                    on its floor, so the head rises out of the top edge into the
+                    margin above. Kept in CSS — see .case-photo-block. */}
+                <div className="case-photo-block">
+                  {student.photo ? (
+                    <img
+                      className="case-photo-img"
+                      src={student.photo}
+                      alt={student.name}
+                      width={304}
+                      height={260}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="case-photo case-photo-avatar" aria-hidden="true">
+                      <span className="case-photo-initials">{initialsOf(student.name)}</span>
+                    </div>
+                  )}
+                  <div className="case-meta">
+                    <strong className="case-name">{student.name}</strong>
+                    {student.role ? <span className="case-role">{student.role}</span> : null}
+                  </div>
                 </div>
-              )}
-              <div className="case-meta">
-                <strong className="case-name">{current.name}</strong>
-                {current.role ? <span className="case-role">{current.role}</span> : null}
-              </div>
-            </div>
-          </article>
+              </article>
+            ))}
+          </div>
 
           {showControls ? (
             <div className="cases-controls">
@@ -128,7 +177,8 @@ export function StudentCases() {
                 type="button"
                 className="case-arrow"
                 aria-label="Предыдущая история"
-                onClick={prev}
+                onClick={() => scrollByCard(-1)}
+                disabled={atStart}
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -142,14 +192,22 @@ export function StudentCases() {
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
-              <span className="cases-counter">
-                {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-              </span>
+              {/* Position, not a control: the rail and the arrows are the way
+                  through, so this is not exposed twice to a screen reader. */}
+              <div className="cases-dots" aria-hidden="true">
+                {STUDENT_CASES.map((student, i) => (
+                  <span
+                    key={student.name}
+                    className={`cases-dot${i === active ? " is-active" : ""}`}
+                  />
+                ))}
+              </div>
               <button
                 type="button"
                 className="case-arrow"
                 aria-label="Следующая история"
-                onClick={next}
+                onClick={() => scrollByCard(1)}
+                disabled={atEnd}
               >
                 <svg
                   viewBox="0 0 24 24"
