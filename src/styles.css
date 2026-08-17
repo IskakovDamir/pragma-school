@@ -812,18 +812,63 @@ section { position: relative; }
 .case-arrow:active:not(:disabled) { transform: translateY(0); }
 /* The rail does not wrap around, so both ends are dead ends and say so. */
 .case-arrow:disabled { opacity: 0.3; cursor: default; }
+
+/* The rail animates its own scrolling from JS (scrollBehavior() in
+   StudentCases.tsx picks "auto" under this query); this covers any scrolling
+   the browser initiates on its own, such as snapping after a flick. */
+@media (prefers-reduced-motion: reduce) {
+  .cases-rail { scroll-behavior: auto; }
+  .cases-dot::before { transition: none; }
+}
+
+/* ---------- Student cases: touch widths ----------
+   One card with the next peeking past the right edge, which is what says the
+   rail scrolls when there are no arrows to say it. The card is fluid so the
+   peek survives 320px, where a fixed 300px card would be wider than the rail
+   itself. 82vw keeps roughly a fifth of the rail for the next card. */
+@media (max-width: 860px) {
+  .cases-rail { gap: 16px; padding-right: 22px; padding-bottom: 20px; }
+  .case-card { --case-pad: 20px; flex: 0 0 min(300px, 82vw); }
+  .case-headline { font-size: 19px; }
+  /* Four lines, not three: the narrower column wraps the longest teasers onto a
+     fourth, and without the taller reservation their photo blocks would sit
+     lower than their neighbours'. */
+  .case-teaser { min-height: calc(14px * 1.55 * 4); }
+  /* Block and portrait shrink together so the head still clears the top edge:
+     220 - (218 - 38) = 40px of overflow, against 53px on the desktop card. */
+  .case-photo-block { height: 218px; margin-top: 34px; }
+  .case-photo-img { max-height: 220px; }
+  /* Touch swipes the rail and the peeking card already advertises it. The
+     arrows are a pointer affordance for people with no swipe gesture, and two
+     44px buttons plus dots crowd a 390px column. The dots stay: they are the
+     position indicator, and they are tappable. */
+  .case-arrow { display: none; }
+  .cases-controls { margin-top: 12px; }
+}
 /* Replaces the old "01 / 05" counter, which stopped meaning anything once
    three cards share the screen. Same slot, same 72px, between the arrows. */
 .cases-dots {
   display: flex; align-items: center; justify-content: center;
-  gap: 8px; min-width: 72px;
+  gap: 2px; min-width: 72px;
 }
+/* 7px of ink inside a 44px target: below 860px the arrows are gone and these
+   are the only thing left to tap. The dot is drawn with a border rather than a
+   background so the button's own box stays the hit area. */
 .cases-dot {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  background: none; border: none; padding: 0;
+  cursor: pointer;
+}
+.cases-dot::before {
+  content: "";
   width: 7px; height: 7px; border-radius: 50%;
   background: rgba(43,26,16,0.20);
   transition: background 0.25s ease, transform 0.25s var(--ease);
 }
-.cases-dot.is-active { background: var(--orange-deep); transform: scale(1.3); }
+.cases-dot:hover::before { background: rgba(43,26,16,0.38); }
+.cases-dot.is-active::before { background: var(--orange-deep); transform: scale(1.3); }
+.cases-dot:focus-visible { outline: 2px solid var(--orange); outline-offset: -8px; border-radius: 50%; }
 
 /* ---------- FAQ ---------- */
 .faq-grid { max-width: 760px; margin: 0 auto; }

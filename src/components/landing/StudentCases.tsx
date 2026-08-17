@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { STUDENT_CASES, TRACK_LABEL } from "@/data/studentCases";
 
 /** First letter of the first two words of a name, for the no-photo avatar. */
@@ -62,57 +62,81 @@ function highlightStats(text: string): ReactNode[] {
   return out;
 }
 
+/** Scrolling animates unless the reader has asked it not to. */
+function scrollBehavior(): ScrollBehavior {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+}
+
 export function StudentCases() {
   const railRef = useRef<HTMLDivElement>(null);
-  // Index of the leftmost card that is not clipped on the left — what the dots
-  // report. All five cards are always mounted; only the scroll offset changes.
+  const metrics = useRef({ step: 0, maxScroll: 0 });
+  // Dots count reachable scroll positions, not cards. With five cards, a 376px
+  // step and only 600px of scroll at 1440, one dot per card left the last two
+  // permanently dead — no scroll offset can ever make card 4 or 5 the leftmost
+  // one. Pages are derived from the rail's own geometry, so the count falls out
+  // of whatever the viewport happens to be.
+  const [pages, setPages] = useState(1);
   const [active, setActive] = useState(0);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
+  const [scrollable, setScrollable] = useState(false);
   const total = STUDENT_CASES.length;
-
-  /** One card plus one gap, measured rather than hardcoded. */
-  const stepPx = useCallback(() => {
-    const rail = railRef.current;
-    const card = rail?.querySelector<HTMLElement>(".case-card");
-    if (!rail || !card) return 0;
-    return card.offsetWidth + (parseFloat(getComputedStyle(rail).columnGap) || 0);
-  }, []);
 
   useEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
 
     const update = () => {
-      const railLeft = rail.getBoundingClientRect().left;
-      const cards = Array.from(rail.querySelectorAll<HTMLElement>(".case-card"));
-      // -1 absorbs sub-pixel scroll offsets, which would otherwise read the
-      // snapped card as one pixel clipped and skip the dot forward.
-      const first = cards.findIndex((c) => c.getBoundingClientRect().left >= railLeft - 1);
-      setActive(first === -1 ? cards.length - 1 : first);
+      const card = rail.querySelector<HTMLElement>(".case-card");
+      if (!card) return;
+      // Measured, not hardcoded: the card width is a media query away from
+      // changing, and a ResizeObserver re-runs this whenever it does.
+      const step = card.offsetWidth + (parseFloat(getComputedStyle(rail).columnGap) || 0);
+      const maxScroll = rail.scrollWidth - rail.clientWidth;
+      metrics.current = { step, maxScroll };
+
+      const canScroll = maxScroll > 1;
+      const pageCount = canScroll && step > 0 ? Math.ceil(maxScroll / step) + 1 : 1;
+      setScrollable(canScroll);
+      setPages(pageCount);
+      setActive(step > 0 ? Math.min(pageCount - 1, Math.round(rail.scrollLeft / step)) : 0);
       setAtStart(rail.scrollLeft <= 1);
-      setAtEnd(rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 1);
+      setAtEnd(rail.scrollLeft >= maxScroll - 1);
     };
 
     update();
     rail.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    // Catches viewport resizes, the mobile breakpoint swapping the card width,
+    // and any late layout shift such as a webfont landing.
+    const observer = new ResizeObserver(update);
+    observer.observe(rail);
     return () => {
       rail.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      observer.disconnect();
     };
   }, []);
 
   const scrollByCard = (direction: 1 | -1) =>
-    railRef.current?.scrollBy({ left: direction * stepPx(), behavior: "smooth" });
+    railRef.current?.scrollBy({
+      left: direction * metrics.current.step,
+      behavior: scrollBehavior(),
+    });
+
+  const scrollToPage = (page: number) =>
+    railRef.current?.scrollTo({
+      // The last page is clamped to maxScroll, which is what makes it reachable
+      // at all — page * step would overshoot the end of the rail.
+      left: Math.min(page * metrics.current.step, metrics.current.maxScroll),
+      behavior: scrollBehavior(),
+    });
 
   // The section is gated on the data itself, not on a separate flag: no real,
   // consented quotes means no section at all — no heading, no empty state, no
   // skeleton. Returned after the hooks so hook order stays stable.
   if (total === 0) return null;
 
-  // A single case has nothing to page through.
-  const showControls = total > 1;
+  // Nothing to page through if every card already fits: no dots, no arrows.
+  const showControls = total > 1 && scrollable;
 
   return (
     <section id="cases" className="block">
@@ -135,7 +159,7 @@ export function StudentCases() {
             role="group"
             aria-label="Истории учеников"
           >
-            {STUDENT_CASES.map((student) => (
+            {STUDENT_CASES.map((student, i) => (
               <article className="case-card" key={student.name}>
                 <span className="case-track">{TRACK_LABEL[student.track]}</span>
                 <h3 className="case-headline">{student.headline}</h3>
@@ -152,9 +176,16 @@ export function StudentCases() {
                       className="case-photo-img"
                       src={student.photo}
                       alt={student.name}
-                      width={304}
-                      height={260}
-                      loading="lazy"
+                      /* Each portrait's own intrinsic size, so the reserved box
+                         has the right shape before the file lands. All five
+                         ratios differ, so one shared pair would shift four. */
+                      width={student.photoWidth}
+                      height={student.photoHeight}
+                      /* Only the first card is on screen at any width, so it is
+                         the one worth fetching up front; the rest wait until
+                         the rail is scrolled toward them. */
+                      loading={i === 0 ? "eager" : "lazy"}
+                      fetchPriority={i === 0 ? "high" : "auto"}
                       decoding="async"
                     />
                   ) : (
@@ -192,13 +223,18 @@ export function StudentCases() {
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
-              {/* Position, not a control: the rail and the arrows are the way
-                  through, so this is not exposed twice to a screen reader. */}
-              <div className="cases-dots" aria-hidden="true">
-                {STUDENT_CASES.map((student, i) => (
-                  <span
-                    key={student.name}
+              {/* One button per reachable position. They are the only control
+                  left below 860px, where the arrows are hidden, so they carry
+                  a 44px tap target around a 7px dot. */}
+              <div className="cases-dots">
+                {Array.from({ length: pages }, (_, i) => (
+                  <button
+                    type="button"
+                    key={i}
                     className={`cases-dot${i === active ? " is-active" : ""}`}
+                    aria-label={`Показать карточки ${i + 1} из ${pages}`}
+                    aria-current={i === active ? "true" : undefined}
+                    onClick={() => scrollToPage(i)}
                   />
                 ))}
               </div>
