@@ -105,9 +105,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Онлайн-школа автоматизации на ИИ. Начни с трёх бесплатных уроков.",
       },
     ],
+    /**
+     * No canonical here, deliberately. This router version (1.170) DEDUPES
+     * `meta` by property/name so a child's value replaces the root's, but it
+     * APPENDS `links` — a root-level canonical would survive alongside every
+     * child's and ship two canonical tags on every detail page.
+     *
+     * So the rule is: every route declares its own canonical, the root declares
+     * none. It also fails in the safer direction — a route that forgets ships no
+     * canonical and the crawler falls back to the page's own URL, which is the
+     * right answer anyway, where inheriting the root's would have actively
+     * pointed the page at the homepage and de-indexed it.
+     *
+     * The links below are the opposite case: appending is exactly what they
+     * want, since every page should inherit the icon, preconnects and styles.
+     */
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "canonical", href: SITE_URL },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
