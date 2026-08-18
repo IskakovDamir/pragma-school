@@ -8,9 +8,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 
-import appCss from "../styles.css?url";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const SITE_URL = "https://edu.pragma.com.kz/";
+import appCss from "../styles.css?url";
 
 /**
  * Absolute URL of the 1200x630 share card. Absolute on purpose: most link
@@ -22,15 +22,15 @@ const SITE_URL = "https://edu.pragma.com.kz/";
  * Cyrillic renders in the actual brand face. Regenerate it from the same markup
  * if the hero copy changes.
  */
-const OG_IMAGE: string | null = `${SITE_URL}og-image.png`;
+const OG_IMAGE: string | null = absoluteUrl("og-image.png");
 const OG_IMAGE_ALT = "Pragma School — Разберись с ИИ с нуля";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+    <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-ink">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-ink">Страница не найдена</h2>
+        <h1 className="text-7xl font-bold text-forest">404</h1>
+        <h2 className="mt-4 text-xl font-semibold text-forest">Страница не найдена</h2>
         <div className="mt-6">
           <Link
             to="/"
@@ -49,9 +49,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+    <div className="flex min-h-screen items-center justify-center bg-cream px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-ink">
+        <h1 className="text-xl font-semibold tracking-tight text-forest">
           Страница не загрузилась
         </h1>
         <div className="mt-6 flex flex-wrap justify-center gap-2">

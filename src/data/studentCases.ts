@@ -45,6 +45,22 @@ export const TRACK_LABEL: Record<StudentTrack, string> = {
 };
 
 export type StudentCase = {
+  /**
+   * The ASCII segment this student's page lives at: /stories/<slug>.
+   *
+   * ASCII, and deliberately so. Cyrillic in a URL path is a liability for the
+   * same reason it was a liability as a filename: "Айсулу" has two byte
+   * representations, composed (NFC: й) and decomposed (NFD: и + combining
+   * breve), and they are different strings. macOS handed us NFD filenames while
+   * a literal typed into this file is NFC, so the request missed the file on
+   * disk and 404'd — on exactly the two names containing "й", which is the kind
+   * of half-broken that ships. A path segment is worse than a filename: it also
+   * gets percent-encoded, pasted into chats, and normalised by whatever is in
+   * between. ASCII cannot be normalised into a different byte string.
+   *
+   * Slugs match the WebP basenames in public/students/ so the two cannot drift.
+   */
+  slug: string;
   name: string;
   /** Which of the two tracks this student took — shown as the card's badge. */
   track: StudentTrack;
@@ -78,6 +94,7 @@ export type StudentCase = {
 
 export const STUDENT_CASES: StudentCase[] = [
   {
+    slug: "aisulu",
     name: "Айсулу",
     track: "personal",
     headline: "Поиск квартиры",
@@ -90,6 +107,7 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 401,
   },
   {
+    slug: "dulat",
     name: "Дулат",
     track: "corporate",
     headline: "Проверка договоров",
@@ -103,6 +121,7 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 462,
   },
   {
+    slug: "maksim",
     name: "Максим",
     track: "corporate",
     headline: "Заказы с маркетплейсов",
@@ -116,6 +135,7 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 487,
   },
   {
+    slug: "ainur",
     name: "Айнур",
     track: "corporate",
     headline: "Сводка по кофейням",
@@ -129,6 +149,7 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 524,
   },
   {
+    slug: "aleksandr",
     name: "Александр",
     track: "personal",
     headline: "Родительская логистика",
@@ -141,3 +162,12 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 555,
   },
 ];
+
+/**
+ * The route resolves a student through here rather than reaching into the array
+ * itself, so the "unknown slug" case has exactly one shape for the caller to
+ * handle and the array stays an implementation detail.
+ */
+export function getStudentBySlug(slug: string): StudentCase | undefined {
+  return STUDENT_CASES.find((student) => student.slug === slug);
+}
