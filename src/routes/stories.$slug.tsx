@@ -88,6 +88,12 @@ function StoryPage() {
             <div className="story-head-text">
               <span className="case-track">{TRACK_LABEL[student.track]}</span>
               <h1 className="story-name">{student.name}</h1>
+              {/* Attribution, not a second headline — it sits between the name
+                  and the statement line and has to stay quiet enough that the
+                  eye still runs name -> what they built. Absent for the two
+                  students who never stated a profession, rather than filled
+                  with something plausible. */}
+              {student.role ? <p className="story-role">{student.role}</p> : null}
               <p className="story-headline">{student.headline}</p>
             </div>
 

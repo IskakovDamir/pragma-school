@@ -67,9 +67,19 @@ export type StudentCase = {
   /** What they automated, in one line. The card's heading. */
   headline: string;
   /**
-   * Optional job title under the name. Most headlines already carry the role
-   * ("Юрист строительной компании, …"), so this stays empty unless a student
-   * has one worth stating separately.
+   * Optional job title. Rendered on the detail page under the name, and
+   * deliberately NOT on the card, which has no room for a second line in the
+   * portrait's name band.
+   *
+   * This used to be described as redundant, on the grounds that the headlines
+   * carried the profession themselves — "Юрист строительной компании, проверка
+   * договоров подряда". They no longer do: shortening them to "Проверка
+   * договоров" dropped the job, and this field is where it went back.
+   *
+   * Optional because it is genuinely unknown for some students, not as a
+   * placeholder to fill in later. Айсулу and Александр stated no profession in
+   * the source material, so they have none here — the same rule as every other
+   * field in this file, nothing that was not actually said.
    */
   role?: string;
   /** Two or three lines. This is what the card shows. */
@@ -92,6 +102,12 @@ export type StudentCase = {
   projectLabel?: string;
 };
 
+/**
+ * Adding an entry here also creates a page at /stories/<slug>. public/sitemap.xml
+ * is hand-maintained and will NOT pick it up — add the matching <url> there too,
+ * or the page ships with a correct canonical that nothing ever points a crawler
+ * at. Nothing in the build catches this.
+ */
 export const STUDENT_CASES: StudentCase[] = [
   {
     slug: "aisulu",
@@ -112,6 +128,7 @@ export const STUDENT_CASES: StudentCase[] = [
     slug: "dulat",
     name: "Дулат",
     track: "corporate",
+    role: "Юрист строительной компании",
     headline: "Проверка договоров",
     teaser:
       "Агент сверяет договор с шаблоном и выдаёт расхождения по пунктам. 40 минут превратились в 6.",
@@ -128,6 +145,7 @@ export const STUDENT_CASES: StudentCase[] = [
     slug: "maksim",
     name: "Максим",
     track: "corporate",
+    role: "Владелец интернет-магазина",
     headline: "Заказы с маркетплейсов",
     teaser:
       "Три площадки сходятся в одну таблицу, склад получает задание сам. Просрочка упала с 12% до 1,5%.",
@@ -144,6 +162,7 @@ export const STUDENT_CASES: StudentCase[] = [
     slug: "ainur",
     name: "Айнур",
     track: "corporate",
+    role: "Собственник сети кофеен",
     headline: "Сводка по кофейням",
     teaser:
       "Каждое утро в 8:30 приходит одно сообщение: выручка по каждой точке и отклонение от плана.",

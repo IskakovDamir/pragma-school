@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { STUDENT_CASES, TRACK_LABEL } from "@/data/studentCases";
 import { highlightStats } from "@/lib/highlightStats";
 
@@ -98,19 +99,30 @@ export function StudentCases() {
         </div>
 
         <div className="cases">
-          {/* tabIndex makes the scroller itself a tab stop, which is what gives
-              it arrow-key scrolling: the cards carry no interactive content of
-              their own yet, and giving static <article>s a tabindex would add
-              focus stops with nothing to do at them. */}
-          <div
-            className="cases-rail"
-            ref={railRef}
-            tabIndex={0}
-            role="group"
-            aria-label="Истории учеников"
-          >
+          {/* The rail deliberately no longer carries tabIndex. It had one to
+              give itself arrow-key scrolling back when nothing inside it was
+              focusable; now every card is a link, so a tab stop on the
+              scroller would be a sixth stop with nothing to do at it, landed
+              on immediately before the five that do. A scroll container needs
+              its own tab stop only while it holds no focusable children —
+              arrow keys scroll the nearest scrollable ancestor of whatever is
+              focused, so arrow-key scrolling survives (verified, not assumed).
+              role and label stay: they are what name the region. */}
+          <div className="cases-rail" ref={railRef} role="group" aria-label="Истории учеников">
             {STUDENT_CASES.map((student, i) => (
-              <article className="case-card" key={student.slug}>
+              /* The whole card is the target, not a "подробнее" tucked into a
+                 corner: the card already summarises exactly one thing, and the
+                 reader is aiming at the card, not at a word inside it. */
+              <Link
+                to="/stories/$slug"
+                params={{ slug: student.slug }}
+                className="case-card"
+                key={student.slug}
+                /* Without this the accessible name is the entire card read
+                   aloud, teaser numbers and all. Same shape as the detail
+                   page's own <title>, so the link announces what it opens. */
+                aria-label={`${student.name}: ${student.headline}`}
+              >
                 <span className="case-track">{TRACK_LABEL[student.track]}</span>
                 <h3 className="case-headline">{student.headline}</h3>
                 {/* student.quote is deliberately not rendered here — the card
@@ -143,12 +155,17 @@ export function StudentCases() {
                       <span className="case-photo-initials">{initialsOf(student.name)}</span>
                     </div>
                   )}
+                  {/* Name only. `role` is filled for the three corporate
+                      students now, and it used to render here too — a second
+                      line in the band would have grown into the 38px the
+                      portrait stops short of, on the three cards that have
+                      one and not the two that do not. The job title belongs to
+                      the detail page, where there is room for it. */}
                   <div className="case-meta">
                     <strong className="case-name">{student.name}</strong>
-                    {student.role ? <span className="case-role">{student.role}</span> : null}
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
 
