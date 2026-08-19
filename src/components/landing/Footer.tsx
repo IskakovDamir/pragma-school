@@ -15,7 +15,7 @@ const COURSE_LINKS = [
 
 const SECTION_LINKS = [
   { href: "#how", label: "Как проходит" },
-  { href: "#works", label: "Работы учеников" },
+  { href: "#cases", label: "Истории учеников" },
   { href: "#faq", label: "Вопросы" },
 ];
 

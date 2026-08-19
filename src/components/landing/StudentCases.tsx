@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { STUDENT_CASES, TRACK_LABEL } from "@/data/studentCases";
 import { highlightStats } from "@/lib/highlightStats";
@@ -12,6 +12,13 @@ function initialsOf(name: string) {
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
 }
+
+/**
+ * THE PALETTE SWITCH. "a" is the warm editorial set, "b" the brighter one;
+ * both are defined in styles.css under section[data-palette="..."]. Changing
+ * this one character swaps all five card colours and nothing else.
+ */
+const PALETTE: "a" | "b" = "a";
 
 /** Scrolling animates unless the reader has asked it not to. */
 function scrollBehavior(): ScrollBehavior {
@@ -90,7 +97,7 @@ export function StudentCases() {
   const showControls = total > 1 && scrollable;
 
   return (
-    <section id="cases" className="block">
+    <section id="cases" className="block" data-palette={PALETTE}>
       <div className="wrap">
         <div className="head-wrap center reveal">
           <div className="eyebrow">Результаты</div>
@@ -123,48 +130,66 @@ export function StudentCases() {
                    page's own <title>, so the link announces what it opens. */
                 aria-label={`${student.name}: ${student.headline}`}
               >
-                <span className="case-track">{TRACK_LABEL[student.track]}</span>
-                <h3 className="case-headline">{student.headline}</h3>
-                {/* student.quote is deliberately not rendered here — the card
-                    shows the teaser, the full text is the detail page's. */}
-                <p className="case-teaser">{highlightStats(student.teaser)}</p>
-
-                {/* The portrait is taller than this block's content box and sits
-                    on its floor, so the head rises out of the top edge into the
-                    margin above. Kept in CSS — see .case-photo-block. */}
+                {/* First in the DOM as well as first in the layout: it is
+                    absolutely positioned against the card so that it can start
+                    ABOVE the card's top edge, which is the point of the whole
+                    composition. See .case-photo-block. */}
                 <div className="case-photo-block">
                   {student.photo ? (
-                    <img
-                      className="case-photo-img"
-                      src={student.photo}
-                      alt={student.name}
-                      /* Each portrait's own intrinsic size, so the reserved box
-                         has the right shape before the file lands. All five
-                         ratios differ, so one shared pair would shift four. */
-                      width={student.photoWidth}
-                      height={student.photoHeight}
-                      /* Only the first card is on screen at any width, so it is
-                         the one worth fetching up front; the rest wait until
-                         the rail is scrolled toward them. */
-                      loading={i === 0 ? "eager" : "lazy"}
-                      fetchPriority={i === 0 ? "high" : "auto"}
-                      decoding="async"
-                    />
+                    /* The wrapper exists solely to carry the drop shadow.
+                       Filters are applied before masks, so a shadow on the
+                       <img> would be cast by the photo's un-faded alpha and
+                       would draw a hard line under a body that has already
+                       dissolved into the card. On the parent it follows the
+                       silhouette that is actually visible. */
+                    <div className="case-photo-lift">
+                      <img
+                        className="case-photo-img"
+                        src={student.photo}
+                        alt={student.name}
+                        /* Per-portrait head normalisation. Written as custom
+                           properties rather than a width/height pair because
+                           the card's CSS composes them with a responsive base
+                           that changes at 860px. See photoScale in
+                           data/studentCases.ts for how they were measured. */
+                        style={
+                          {
+                            "--pf": student.photoScale,
+                            "--pf-eye": student.photoEye,
+                            "--pf-fade": student.photoFade,
+                          } as CSSProperties
+                        }
+                        /* Each portrait's own intrinsic size, so the reserved
+                           box has the right shape before the file lands. All
+                           five ratios differ, so one shared pair would shift
+                           four. */
+                        width={student.photoWidth}
+                        height={student.photoHeight}
+                        /* Only the first card is on screen at any width, so it
+                           is the one worth fetching up front; the rest wait
+                           until the rail is scrolled toward them. */
+                        loading={i === 0 ? "eager" : "lazy"}
+                        fetchPriority={i === 0 ? "high" : "auto"}
+                        decoding="async"
+                      />
+                    </div>
                   ) : (
-                    <div className="case-photo case-photo-avatar" aria-hidden="true">
+                    <div className="case-photo-avatar" aria-hidden="true">
                       <span className="case-photo-initials">{initialsOf(student.name)}</span>
                     </div>
                   )}
-                  {/* Name only. `role` is filled for the three corporate
-                      students now, and it used to render here too — a second
-                      line in the band would have grown into the 38px the
-                      portrait stops short of, on the three cards that have
-                      one and not the two that do not. The job title belongs to
-                      the detail page, where there is room for it. */}
-                  <div className="case-meta">
-                    <strong className="case-name">{student.name}</strong>
-                  </div>
                 </div>
+
+                <span className="case-track">{TRACK_LABEL[student.track]}</span>
+                {/* The name is the card's heading, as it is the <h1> of the
+                    page this card opens. The order below — badge, name,
+                    statement, body — is the story header's order, so the card
+                    and its detail page read the same way round. */}
+                <h3 className="case-name">{student.name}</h3>
+                <p className="case-headline">{student.headline}</p>
+                {/* student.quote is deliberately not rendered here — the card
+                    shows the teaser, the full text is the detail page's. */}
+                <p className="case-teaser">{highlightStats(student.teaser)}</p>
               </Link>
             ))}
           </div>

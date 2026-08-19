@@ -98,6 +98,49 @@ export type StudentCase = {
    */
   photoWidth?: number;
   photoHeight?: number;
+  /**
+   * Head-scale normalisation. The card renders every portrait at
+   * `--case-photo-unit * photoScale` tall, and slides it so that
+   * `--case-photo-unit * photoEye` from the image's top lands on the card's
+   * shared eye line. Together they put the five faces at the same size and on
+   * the same horizon.
+   *
+   * This exists because the five crops are wildly inconsistent as SHOT, and
+   * fitting each one independently — which is what the card used to do, with a
+   * single max-height — is what made the row look wrong. Measured against each
+   * portrait's own frame height: Александр's face fills ~31% of his frame and
+   * Айсулу's ~10%, so a shared max-height rendered his head close to twice the
+   * size of hers. No amount of colour fixes that; it is the first thing the eye
+   * catches when the five are seen side by side.
+   *
+   * photoScale is proportional to (frame height / face height), normalised so
+   * the largest is 1. photoEye is the eye line's depth into the frame as a
+   * fraction, times photoScale — precomputed here because CSS cannot multiply
+   * two custom properties into a length cleanly.
+   *
+   * Derived from the cutouts themselves, not from the numbers above: alpha
+   * silhouette analysis finds the shoulder line reliably on the three short
+   * haircuts and not at all on Айсулу and Айнур, whose hair merges into the
+   * body, so the face landmarks were read off a gridded render of each frame
+   * and then confirmed by eye against the five rendered side by side. Re-crop
+   * a portrait and both numbers have to be re-measured — nothing derives them
+   * at build time.
+   */
+  photoScale?: number;
+  photoEye?: number;
+  /**
+   * Where this portrait starts fading out, as a percentage of its own rendered
+   * height. Defaults to 80 in CSS; set it lower only when the cutout contains
+   * something that is not the person.
+   *
+   * Two of the five do. Айсулу was photographed behind a laptop and Айнур with
+   * her hands on a keyboard, and both objects came away in the cutout. On the
+   * old pale wash they were unremarkable; on a saturated fill they read as
+   * grey ghosts floating on the colour. Fading each portrait out above its own
+   * furniture removes them without touching the other three, and without
+   * re-cropping source files that are otherwise fine.
+   */
+  photoFade?: number;
   projectUrl?: string;
   projectLabel?: string;
 };
@@ -123,6 +166,9 @@ export const STUDENT_CASES: StudentCase[] = [
     photo: "/students/aisulu.webp",
     photoWidth: 300,
     photoHeight: 401,
+    photoScale: 0.842,
+    photoEye: 0.149,
+    photoFade: 50, // laptop starts ~71% down; gone by 70%
   },
   {
     slug: "dulat",
@@ -140,6 +186,8 @@ export const STUDENT_CASES: StudentCase[] = [
     photo: "/students/dulat.webp",
     photoWidth: 426,
     photoHeight: 462,
+    photoScale: 0.549,
+    photoEye: 0.092,
   },
   {
     slug: "maksim",
@@ -157,6 +205,8 @@ export const STUDENT_CASES: StudentCase[] = [
     photo: "/students/maksim.webp",
     photoWidth: 323,
     photoHeight: 487,
+    photoScale: 0.779,
+    photoEye: 0.16,
   },
   {
     slug: "ainur",
@@ -174,6 +224,9 @@ export const STUDENT_CASES: StudentCase[] = [
     photo: "/students/ainur.webp",
     photoWidth: 433,
     photoHeight: 524,
+    photoScale: 0.86,
+    photoEye: 0.142,
+    photoFade: 48, // arm reaches for the keyboard ~69% down; gone by 68%
   },
   {
     slug: "aleksandr",
@@ -189,6 +242,8 @@ export const STUDENT_CASES: StudentCase[] = [
     photo: "/students/aleksandr.webp",
     photoWidth: 335,
     photoHeight: 555,
+    photoScale: 0.581,
+    photoEye: 0.167,
   },
 ];
 
