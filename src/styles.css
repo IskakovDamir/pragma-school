@@ -657,6 +657,23 @@ section { position: relative; }
    thing standing between the portraits and the scroller's clip. */
 .cases {
   max-width: none;
+  /* How far the leading card is inset from the left viewport edge, which is
+     also what decides how much of the PREVIOUS card is left showing: the
+     sliver is this minus the gap.
+
+     It tracks the page's gutter — the same arithmetic .wrap uses, max-width
+     1200 with 32px sides, so at 1440 the leading card lands exactly under the
+     heading — but clamped at both ends, because the raw gutter does not
+     survive the range. Unclamped it is 32px at 1024, which leaves an 8px
+     hairline of the previous card that reads as a rendering fault rather than
+     a design, and 392px at 1920, which stops clipping the previous card at all
+     and simply shows a whole extra one. The clamp keeps the sliver between
+     roughly a fifth and two fifths of a card at every desktop width.
+
+     Derived from 100% rather than 100vw on purpose: vw includes the scrollbar,
+     and that 8-15px error would show up as the two edges clipping by
+     different amounts. */
+  --case-gutter: clamp(96px, calc((100% - 1200px) / 2 + 32px), 176px);
   /* The frame's own proportion. 4:5 portrait, so the card's height falls out of
      its width and nothing has to be measured in JS. */
   --case-ratio: 4 / 5;
@@ -727,12 +744,19 @@ section[data-palette="b"] {
   gap: 24px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  /* Bleeds right to the viewport edge so the next card is cut by the screen,
-     not by a container edge — the clip is the affordance. The left edge stays
-     on .wrap's gutter, so the rail still starts in line with every other
-     section. -32px of the padding is spent on an end gutter for the last card. */
-  margin-right: calc(50% - 50vw);
-  padding-right: 32px;
+  /* Full-bleed on BOTH edges, so a partial card is cut by the screen on the
+     left as well as the right. This is done by living outside .wrap rather
+     than by negative margins — see the markup — which keeps the arithmetic
+     honest at every width.
+
+     scroll-padding-left is what makes it work with the loop rather than
+     against it. Snap positions are measured from the scroll port's start edge
+     PLUS this padding, so a card snaps with its left edge on the gutter, and
+     the snap offset for card N stays an exact multiple of the step. Drop it
+     and the rail still bleeds, but every snap point shifts by one gutter, the
+     loop's park-at-setWidth lands off-snap and the browser drags it back. */
+  padding-left: var(--case-gutter);
+  scroll-padding-left: var(--case-gutter);
   /* This used to be 124px of clearance for a portrait that broke out above the
      card's top edge. Nothing breaks out any more — the frame crops — so the
      only thing left to clear is the 2px hover lift. Leaving the old value would
@@ -1084,12 +1108,38 @@ section[data-palette="b"] {
   box-shadow: inset 0 -0.26em 0 rgba(255, 255, 255, 0.34);
 }
 
+/* ---------- Section header ----------
+   Two columns, and deliberately NOT the centred rhythm the rest of the page
+   keeps: label and headline on the left, the supporting line, the CTA and the
+   rail's own controls stacked down the right. */
+.cases-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  column-gap: 64px;
+  align-items: start;
+  margin-bottom: 40px;
+}
+.cases-head-left .h2 {
+  margin-bottom: 0;
+}
+.cases-head-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+  /* The right column's text sits on the headline's baseline block rather than
+     at the very top, which is what stops the two columns reading as unrelated. */
+  padding-top: 6px;
+}
+.cases-head-right .section-lead {
+  max-width: 42ch;
+}
+/* Right-aligned under the CTA, which is where the reference puts them. */
 .cases-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
-  margin-top: 28px;
+  gap: 12px;
+  align-self: flex-end;
 }
 .case-arrow {
   width: 44px;
@@ -1118,21 +1168,12 @@ section[data-palette="b"] {
 .case-arrow:active:not(:disabled) {
   transform: translateY(0);
 }
-/* The rail does not wrap around, so both ends are dead ends and say so. */
-.case-arrow:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
 /* The rail animates its own scrolling from JS (scrollBehavior() in
    StudentCases.tsx picks "auto" under this query); this covers any scrolling
    the browser initiates on its own, such as snapping after a flick. */
 @media (prefers-reduced-motion: reduce) {
   .cases-rail {
     scroll-behavior: auto;
-  }
-  .cases-dot::before {
-    transition: none;
   }
 }
 
@@ -1150,10 +1191,24 @@ section[data-palette="b"] {
     --case-photo-unit: 545px;
     --case-eye: 119px;
   }
+  /* Tablet width still has room for a real sliver on the left and a real peek
+     on the right, so it keeps an inset — just a smaller one than the desktop
+     clamp, which at 96px would eat the right-hand peek at this card width. */
+  .cases {
+    --case-gutter: 64px;
+  }
   .cases-rail {
     gap: 16px;
-    padding-right: 22px;
     padding-bottom: 22px;
+  }
+  /* One column. The controls keep their own line under the CTA. */
+  .cases-head {
+    grid-template-columns: 1fr;
+    row-gap: 22px;
+    margin-bottom: 28px;
+  }
+  .cases-head-right {
+    padding-top: 0;
   }
   .case-card {
     flex: 0 0 min(300px, 82vw);
@@ -1175,62 +1230,10 @@ section[data-palette="b"] {
   .case-photo-initials {
     font-size: 34px;
   }
-  /* Touch swipes the rail and the peeking card already advertises it. The
-     arrows are a pointer affordance for people with no swipe gesture, and two
-     44px buttons plus dots crowd a 390px column. The dots stay: they are the
-     position indicator, and they are tappable. */
-  .case-arrow {
-    display: none;
-  }
-  .cases-controls {
-    margin-top: 12px;
-  }
+  /* The arrows now stay at every width. They used to be hidden here because
+     the dots were the tappable control at this size; with the dots gone,
+     hiding them would leave a phone with no control at all beyond the swipe. */
 }
-/* Replaces the old "01 / 05" counter, which stopped meaning anything once
-   three cards share the screen. Same slot, same 72px, between the arrows. */
-.cases-dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 72px;
-}
-/* 7px of ink inside a 44px target: below 860px the arrows are gone and these
-   are the only thing left to tap. The dot is drawn with a border rather than a
-   background so the button's own box stays the hit area. */
-.cases-dot {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-.cases-dot::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(43, 26, 16, 0.2);
-  transition:
-    background 0.25s ease,
-    transform 0.25s var(--ease);
-}
-.cases-dot:hover::before {
-  background: rgba(43, 26, 16, 0.38);
-}
-.cases-dot.is-active::before {
-  background: var(--orange-deep);
-  transform: scale(1.3);
-}
-.cases-dot:focus-visible {
-  outline: 2px solid var(--orange);
-  outline-offset: -8px;
-  border-radius: 50%;
-}
-
 /* ---------- Story page ----------
    The card opened up, in the same language rather than a second one: the badge
    is literally .case-track and the numbers are the same .stat-highlight, both
@@ -1490,6 +1493,19 @@ footer { border-top: 1px solid rgba(43,26,16,0.14); padding: 64px 0 40px; }
 /* --orange is 4.32:1 on cream at 14px, just under AA; --orange-deep is 5.01:1. */
 .foot-bottom-cta { font-family: var(--sans); font-weight: 600; font-size: 14px; color: var(--orange-deep); }
 .foot-bottom-cta:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- Student cases: phone widths ----------
+   Below 560px the card is 300px wide in a viewport barely larger, and there is
+   no longer room for a sliver on the left AND the next card peeking on the
+   right. The peek wins: it is the only thing that says "this scrolls" when a
+   thumb is the only input, where the left-hand sliver is decoration. The card
+   falls back to the page's own 22px gutter, which leaves the previous card
+   showing only the few pixels the 16px flex gap does not cover. */
+@media (max-width: 560px) {
+  .cases {
+    --case-gutter: 22px;
+  }
+}
 
 /* ---------- Nav: very narrow screens ----------
    Below 860 the nav is already down to logo + "Начать" + burger. Under ~335px

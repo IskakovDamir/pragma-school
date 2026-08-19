@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { STUDENT_CASES, TRACK_LABEL, type StudentCase } from "@/data/studentCases";
 import { highlightStats } from "@/lib/highlightStats";
@@ -171,11 +171,6 @@ export function StudentCases() {
    */
   const target = useRef<number | null>(null);
   const started = useRef(false);
-  // One dot per student, which is only honest because of the clones: without
-  // them the rail runs out of scrollable width and the last cards can never
-  // reach the leading position, which is why this used to count reachable
-  // scroll offsets instead and showed two dots at 1920px for five people.
-  const [active, setActive] = useState(0);
   const total = STUDENT_CASES.length;
 
   useEffect(() => {
@@ -211,22 +206,13 @@ export function StudentCases() {
       else if (x < setWidth) rail.scrollLeft = x + setWidth;
     };
 
-    const syncDots = () => {
-      const { step } = metrics.current;
-      if (step <= 0) return;
-      const lead = Math.round(rail.scrollLeft / step);
-      setActive(((lead % total) + total) % total);
-    };
-
     let idle = 0;
     const settle = () => {
       target.current = null;
       rebase();
-      syncDots();
     };
 
     const onScroll = () => {
-      syncDots();
       // Rebasing mid-flight would cancel the browser's own smooth scroll or
       // the reader's momentum, so it waits for the rail to stop. Scroll events
       // keep arriving throughout both, which is exactly what holds this off.
@@ -248,7 +234,6 @@ export function StudentCases() {
       rail.scrollLeft = metrics.current.setWidth;
       started.current = true;
     }
-    syncDots();
 
     rail.addEventListener("scroll", onScroll, { passive: true });
     rail.addEventListener("pointerdown", release, { passive: true });
@@ -261,7 +246,6 @@ export function StudentCases() {
       // meant a moment ago it does not mean now. Put it back in the band at
       // once rather than waiting for a scroll that may never come.
       rebase();
-      syncDots();
     });
     observer.observe(rail);
 
@@ -306,19 +290,6 @@ export function StudentCases() {
     rail.scrollTo({ left: to, behavior: scrollBehavior() });
   };
 
-  /** The shortest way round to a given student, forwards or backwards. */
-  const goToStudent = (index: number) => {
-    const { step } = metrics.current;
-    const rail = railRef.current;
-    if (!rail || step <= 0) return;
-    const from = target.current ?? rail.scrollLeft;
-    const current = ((Math.round(from / step) % total) + total) % total;
-    let by = index - current;
-    if (by > total / 2) by -= total;
-    if (by < -total / 2) by += total;
-    travel(by);
-  };
-
   // The section is gated on the data itself, not on a separate flag: no real,
   // consented quotes means no section at all — no heading, no empty state, no
   // skeleton. Returned after the hooks so hook order stays stable.
@@ -326,92 +297,96 @@ export function StudentCases() {
 
   return (
     <section id="cases" className="block" data-palette={PALETTE}>
+      {/* Only the header is held to the page's centred column. The rail below
+          is a sibling of .wrap, not a child of it, which is what lets it reach
+          both viewport edges without negative margins. */}
       <div className="wrap">
-        <div className="head-wrap center reveal">
-          <div className="eyebrow">Результаты</div>
-          <h2 className="h2">Истории наших учеников</h2>
-          <p className="section-lead">Реальные задачи, которые они закрыли автоматизацией.</p>
-        </div>
-
-        <div className="cases">
-          {/* The rail deliberately no longer carries tabIndex. It had one to
-              give itself arrow-key scrolling back when nothing inside it was
-              focusable; now every card is a link, so a tab stop on the
-              scroller would be a sixth stop with nothing to do at it, landed
-              on immediately before the five that do. A scroll container needs
-              its own tab stop only while it holds no focusable children —
-              arrow keys scroll the nearest scrollable ancestor of whatever is
-              focused, so arrow-key scrolling survives (verified, not assumed).
-              role and label stay: they are what name the region. */}
-          <div className="cases-rail" ref={railRef} role="group" aria-label="Истории учеников">
-            {Array.from({ length: SETS }, (_, set) =>
-              STUDENT_CASES.map((student, i) => (
-                <CaseCard
-                  key={`${set}-${student.slug}`}
-                  student={student}
-                  clone={set !== REAL_SET}
-                  eager={set === 0 && i === 0}
-                />
-              )),
-            )}
+        <div className="cases-head reveal">
+          <div className="cases-head-left">
+            <div className="eyebrow">Результаты</div>
+            <h2 className="h2">Истории наших учеников</h2>
           </div>
-
-          {total > 1 ? (
-            <div className="cases-controls">
-              {/* Neither arrow ever disables. There is no end to be at. */}
-              <button
-                type="button"
-                className="case-arrow"
-                aria-label="Предыдущая история"
-                onClick={() => travel(-1)}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+          <div className="cases-head-right">
+            <p className="section-lead">Реальные задачи, которые они закрыли автоматизацией.</p>
+            {/* The same destination and the same button as the hero, Free and
+                the final CTA — byte for byte, not a new one for this section. */}
+            <a
+              className="btn btn-primary"
+              href="https://pragme-edu.kz/app?course=teaser"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="arrow">→</span> Забрать бесплатно
+            </a>
+            {total > 1 ? (
+              <div className="cases-controls">
+                {/* Neither arrow ever disables. There is no end to be at. */}
+                <button
+                  type="button"
+                  className="case-arrow"
+                  aria-label="Предыдущая история"
+                  onClick={() => travel(-1)}
                 >
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-              {/* One dot per student, not per scroll offset. They are the only
-                  control left below 860px, where the arrows are hidden, so
-                  they carry a 44px tap target around a 7px dot. */}
-              <div className="cases-dots">
-                {STUDENT_CASES.map((student, i) => (
-                  <button
-                    type="button"
-                    key={student.slug}
-                    className={`cases-dot${i === active ? " is-active" : ""}`}
-                    aria-label={`Показать историю: ${student.name}`}
-                    aria-current={i === active ? "true" : undefined}
-                    onClick={() => goToStudent(i)}
-                  />
-                ))}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="case-arrow"
+                  aria-label="Следующая история"
+                  onClick={() => travel(1)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </button>
               </div>
-              <button
-                type="button"
-                className="case-arrow"
-                aria-label="Следующая история"
-                onClick={() => travel(1)}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M9 6l6 6-6 6" />
-                </svg>
-              </button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* The dots are gone, and not just from the markup: a continuous loop has
+          no position to indicate honestly, so the state that drove them went
+          with them. Nothing else read it. */}
+      <div className="cases">
+        {/* The rail deliberately no longer carries tabIndex. It had one to
+            give itself arrow-key scrolling back when nothing inside it was
+            focusable; now every card is a link, so a tab stop on the
+            scroller would be a sixth stop with nothing to do at it, landed
+            on immediately before the five that do. A scroll container needs
+            its own tab stop only while it holds no focusable children —
+            arrow keys scroll the nearest scrollable ancestor of whatever is
+            focused, so arrow-key scrolling survives (verified, not assumed).
+            role and label stay: they are what name the region. */}
+        <div className="cases-rail" ref={railRef} role="group" aria-label="Истории учеников">
+          {Array.from({ length: SETS }, (_, set) =>
+            STUDENT_CASES.map((student, i) => (
+              <CaseCard
+                key={`${set}-${student.slug}`}
+                student={student}
+                clone={set !== REAL_SET}
+                eager={set === 0 && i === 0}
+              />
+            )),
+          )}
         </div>
       </div>
     </section>
