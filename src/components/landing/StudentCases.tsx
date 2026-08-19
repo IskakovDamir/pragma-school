@@ -17,8 +17,14 @@ function initialsOf(name: string) {
  * THE PALETTE SWITCH. "a" is the warm editorial set, "b" the brighter one;
  * both are defined in styles.css under section[data-palette="..."]. Changing
  * this one character swaps all five card colours and nothing else.
+ *
+ * On "b" because the card rebuild asked for it by name. Note that it is doing
+ * a different job here than it did on the flat card: the colour is now a lit
+ * backdrop behind a cutout rather than the card's own surface, and everything
+ * below the scrim is near-black on all five, so the palette reads at the top of
+ * the frame and barely at the bottom.
  */
-const PALETTE: "a" | "b" = "a";
+const PALETTE: "a" | "b" = "b";
 
 /**
  * The rail renders the five students three times over and keeps the scroll
@@ -80,32 +86,32 @@ function CaseCard({
          accessible name to give. */
       aria-label={clone ? undefined : `${student.name}: ${student.headline}`}
     >
-      {/* First in the DOM as well as first in the layout: it is absolutely
-          positioned against the card so that it can start ABOVE the card's top
-          edge, which is the point of the whole composition. See
-          .case-photo-block. */}
+      {/* The photograph IS the card: it fills the frame, and the frame crops
+          whatever runs past it. Nothing breaks out any more — see
+          .case-photo-block, and the reversal noted on .case-card. */}
       <div className="case-photo-block">
         {student.photo ? (
-          /* The wrapper exists solely to carry the drop shadow. Filters are
-             applied before masks, so a shadow on the <img> would be cast by
-             the photo's un-faded alpha and would draw a hard line under a body
-             that has already dissolved into the card. On the parent it follows
-             the silhouette that is actually visible. */
+          /* The wrapper carries the shadow that grounds the subject against
+             the backdrop. It cannot live on the <img>, because filters are
+             applied before masks and the shadow would then be cast by the
+             photo's un-faded alpha, drawing a hard line under a body that has
+             already dissolved into the scrim. */
           <div className="case-photo-lift">
             <img
               className="case-photo-img"
               src={student.photo}
-              alt={student.name}
-              /* Per-portrait head normalisation. Written as custom properties
-                 rather than a width/height pair because the card's CSS
-                 composes them with a responsive base that changes at 860px.
-                 See photoScale in data/studentCases.ts for how they were
-                 measured. */
+              alt=""
+              /* Per-portrait head normalisation, unchanged from the previous
+                 card: --pf sizes the subject and --pf-eye lands every eye line
+                 on the same horizon. Only the base unit grew, because the
+                 subject now has to fill a frame. See photoScale in
+                 data/studentCases.ts for how they were measured. */
               style={
                 {
                   "--pf": student.photoScale,
                   "--pf-eye": student.photoEye,
                   "--pf-fade": student.photoFade,
+                  "--pf-fade-span": student.photoFadeSpan,
                 } as CSSProperties
               }
               /* Each portrait's own intrinsic size, so the reserved box has the
@@ -114,11 +120,10 @@ function CaseCard({
               width={student.photoWidth}
               height={student.photoHeight}
               /* Only one card is on screen before the reader touches anything,
-                 so it is the only one worth fetching up front. That is the
-                 FIRST card in the DOM, not the first real one: the rail is
-                 server-rendered at offset 0, showing the leading clone, and
-                 only jumps into the middle copy once the effect runs. The two
-                 share a src, so this is one request either way. */
+                 and it is the FIRST card in the DOM, not the first real one:
+                 the rail is server-rendered at offset 0, showing the leading
+                 clone, and only jumps into the real copy once the effect runs.
+                 The two share a src, so this is one request either way. */
               loading={eager ? "eager" : "lazy"}
               fetchPriority={eager ? "high" : "auto"}
               decoding="async"
@@ -131,16 +136,25 @@ function CaseCard({
         )}
       </div>
 
-      <span className="case-track">{TRACK_LABEL[student.track]}</span>
-      {/* The name is the card's heading, as it is the <h1> of the page this
-          card opens. The order below — badge, name, statement, body — is the
-          story header's order, so the card and its detail page read the same
-          way round. */}
-      <h3 className="case-name">{student.name}</h3>
-      <p className="case-headline">{student.headline}</p>
-      {/* student.quote is deliberately not rendered here — the card shows the
-          teaser, the full text is the detail page's. */}
-      <p className="case-teaser">{highlightStats(student.teaser)}</p>
+      {/* Decorative: it exists to make the white text below legible over
+          whatever the photograph is doing, not to say anything. */}
+      <div className="case-scrim" aria-hidden="true" />
+
+      <div className="case-body">
+        {/* The teaser is the quote. student.quote is still not rendered here —
+            the card shows one line, the full text is the detail page's. */}
+        <p className="case-quote">{highlightStats(student.teaser)}</p>
+        <div className="case-foot">
+          <span className="case-track">{TRACK_LABEL[student.track]}</span>
+          <div className="case-who">
+            <h3 className="case-name">{student.name}</h3>
+            {/* role where the student stated one, headline where they did not,
+                so all five cards carry two lines instead of three carrying two.
+                Both are already true of that student; neither is invented. */}
+            <span className="case-role-line">{student.role ?? student.headline}</span>
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }

@@ -129,18 +129,24 @@ export type StudentCase = {
   photoScale?: number;
   photoEye?: number;
   /**
-   * Where this portrait starts fading out, as a percentage of its own rendered
-   * height. Defaults to 80 in CSS; set it lower only when the cutout contains
+   * Where this portrait starts fading out, and over how many percent of its own
+   * height. Default 80 / 20 in CSS; set them only when the cutout contains
    * something that is not the person.
    *
-   * Two of the five do. Айсулу was photographed behind a laptop and Айнур with
-   * her hands on a keyboard, and both objects came away in the cutout. On the
-   * old pale wash they were unremarkable; on a saturated fill they read as
-   * grey ghosts floating on the colour. Fading each portrait out above its own
-   * furniture removes them without touching the other three, and without
-   * re-cropping source files that are otherwise fine.
+   * Two of the five did. Айсулу was photographed behind a laptop and Айнур with
+   * her hands on a keyboard, and both objects came away in the cutout.
+   *
+   * ONE OF THE TWO NO LONGER NEEDS IT. On the frame-filling card the subject is
+   * scaled until it overflows the frame — Айнур now renders to 136% of the card
+   * height — so her keyboard is cropped off the bottom before any mask is
+   * involved, and her override is gone. Айсулу's laptop sits higher in her
+   * frame, at about 71%, and still lands inside the card, so hers stays: a fade
+   * finishing by 70% removes it. The span is 10 rather than the default 20
+   * because a fade must FINISH above an object to hide it, and starting at 51%
+   * to clear 71% would have thrown away a fifth of her torso.
    */
   photoFade?: number;
+  photoFadeSpan?: number;
   projectUrl?: string;
   projectLabel?: string;
 };
@@ -168,7 +174,8 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 401,
     photoScale: 0.842,
     photoEye: 0.149,
-    photoFade: 50, // laptop starts ~71% down; gone by 70%
+    photoFade: 60, // laptop starts ~71% down; gone by 70%
+    photoFadeSpan: 10,
   },
   {
     slug: "dulat",
@@ -226,7 +233,6 @@ export const STUDENT_CASES: StudentCase[] = [
     photoHeight: 524,
     photoScale: 0.86,
     photoEye: 0.142,
-    photoFade: 48, // arm reaches for the keyboard ~69% down; gone by 68%
   },
   {
     slug: "aleksandr",
