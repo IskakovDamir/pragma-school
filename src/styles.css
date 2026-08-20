@@ -629,6 +629,136 @@ section { position: relative; }
 .callout-lead { font-size: 17px; line-height: 1.55; color: var(--muted); max-width: 560px; margin: -14px auto 12px; }
 .callout-note { font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; color: var(--muted); margin: 0 auto 26px; }
 
+/* ---------- Skills: the tag field ----------
+   A full-bleed black band in the slot the deleted "Что собирают на курсе"
+   section held, between the hero and the student cases. Everything in it is
+   static — no animation, no marquee, no hover, no .reveal — so the only thing
+   that has to be right is the colour arithmetic.
+
+   THE CONTRAST RULE, measured rather than assumed. The labels run 21px/500,
+   which WCAG counts as normal text, so the bar is AA 4.5:1:
+
+     gradient, saturated   #fff on #c95100 ........  4.51:1   worst of 8 ramps
+     gradient, tinted      #2b1a10 on #f2b3e6 .....  9.83:1   worst of 5 ramps
+     solid white           #2b1a10 on #ffffff ..... 16.69:1
+     outline               #fff on #0a0a0a ........ 19.80:1
+
+   Sampled at 201 points along every two-stop ramp, not just at the ends: a CSS
+   gradient interpolates in sRGB and a midpoint can be darker than both stops.
+   It never is here — on all thirteen the worst point IS an endpoint. That 4.51
+   is the same brand orange the student cards run into, and it is why the
+   saturated ramps carry solid #fff and nothing softer.
+
+   The tinted ramps exist because a field of nothing but saturated fills reads
+   as one loud stripe. They are the SAME five palette-B hues lifted 70% toward
+   white — c + (255 - c) * 0.7 — so no new hue enters the section, and at that
+   lightness white is nowhere near legible: the label goes dark instead. */
+.skills-band {
+  --band: #0a0a0a;
+  --pill-h: 52px;
+  --pill-pad: 26px;
+  --pill-font: 21px;
+  --pill-gap: 12px;
+
+  background: var(--band);
+  /* Generous on purpose. At the 80px .block default a dark band between two
+     cream sections reads as a rule someone drew, not as a panel. */
+  padding: clamp(84px, 8.6vw, 132px) 0;
+}
+/* The site eyebrow is --orange-deep, which measures 2.2:1 on this band. The
+   word goes white; the dot keeps the hue, because a 6px dot is decoration and
+   carries no text contrast requirement. */
+.skills-band .eyebrow { color: #fff; }
+.skills-band .eyebrow::before { background: var(--orange); }
+.skills-band .h2 { color: #fff; margin-bottom: 0; }
+.skills-head { margin-bottom: clamp(34px, 3.4vw, 48px); }
+
+/* ONE wrapping flex row, not seven hand-cut ones. Wrapping is what makes the
+   right edge ragged for free at every width, and — the reason it is not a
+   preference — it is the only version that cannot push a pill past the
+   viewport edge. A clipped pill would promise sideways scrolling, and nothing
+   here scrolls. Authored order survives the wrap, so the alternation of
+   treatments holds wherever the browser decides to break. */
+.skills-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pill-gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  height: var(--pill-h);
+  padding: 0 var(--pill-pad);
+  /* Transparent border on every pill, not just the outline one, so the three
+     treatments are the same box and a row does not shift by 2px per type. */
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: var(--pill-font);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.sp-solid { background: #fff; color: var(--forest); }
+.sp-line { color: #fff; border-color: rgba(255, 255, 255, 0.6); }
+.sp-grad { background-image: linear-gradient(97deg, var(--pa), var(--pb)); color: #fff; }
+.sp-light { color: var(--forest); }
+
+/* Saturated ramps: palette B pairs, adjacent hues only, so nothing
+   interpolates through mud. */
+.sp-g1 { --pa: #c95100; --pb: #d400ab; }
+.sp-g2 { --pa: #8d44ff; --pb: #0069fa; }
+.sp-g3 { --pa: #0069fa; --pb: #008442; }
+.sp-g4 { --pa: #d400ab; --pb: #8d44ff; }
+.sp-g5 { --pa: #008442; --pb: #0069fa; }
+.sp-g6 { --pa: #d400ab; --pb: #c95100; }
+.sp-g7 { --pa: #8d44ff; --pb: #d400ab; }
+.sp-g8 { --pa: #0069fa; --pb: #8d44ff; }
+/* The same five hues at 70% white. */
+.sp-l1 { --pa: #b3dac6; --pb: #b3d2fe; }
+.sp-l2 { --pa: #ddc7ff; --pb: #f2b3e6; }
+.sp-l3 { --pa: #efcbb3; --pb: #f2b3e6; }
+.sp-l4 { --pa: #b3d2fe; --pb: #ddc7ff; }
+.sp-l5 { --pa: #f2b3e6; --pb: #efcbb3; }
+
+/* Logo badges, sized off --pill-h so they sit on the same baseline grid as the
+   words. White ground, because every file in public/integrations is drawn for
+   one. Only the artwork decides which of them can appear: amocrm.svg is a
+   solid blue tile with the wordmark set inside it, and at 52% of a 48px badge
+   that word is roughly 3px tall — unreadable, so it reads as a blue square and
+   is not used. */
+.skill-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--pill-h);
+  height: var(--pill-h);
+  border-radius: 999px;
+  background: #fff;
+}
+.skill-logo-sq { border-radius: calc(var(--pill-h) * 0.3); }
+.skill-logo img { display: block; width: 52%; height: 52%; object-fit: contain; }
+
+/* Pills shrink with the viewport so the field keeps six to eight rows on
+   desktop instead of collapsing to four. Below 860px the gutter is already
+   22px, and at 320 the longest label — обработка документов — measures 180px
+   inside a 276px container, so nothing is ever forced to overflow. */
+@media (max-width: 1299px) {
+  .skills-band { --pill-h: 48px; --pill-pad: 24px; --pill-font: 19px; --pill-gap: 11px; }
+}
+@media (max-width: 1023px) {
+  .skills-band { --pill-h: 44px; --pill-pad: 21px; --pill-font: 17px; --pill-gap: 10px; }
+}
+@media (max-width: 560px) {
+  .skills-band { --pill-h: 36px; --pill-pad: 15px; --pill-font: 14px; --pill-gap: 8px; }
+}
+
 /* ---------- Student cases carousel ----------
    A tall card that is one flat saturated colour, with white text sitting
    directly on it and the student's cutout portrait standing in front of it,
